@@ -1,5 +1,6 @@
-import java.util.ArrayList;
+package jabberpoint;
 
+import java.util.ArrayList;
 
 /**
  * <p>Presentation maintains the slides in the presentation.</p>

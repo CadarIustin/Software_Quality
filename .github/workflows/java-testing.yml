@@ -18,10 +18,16 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
         cache: maven
+    - name: Configure Maven for cross-platform support
+      run: |
+        echo "MAVEN_OPTS=-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$GITHUB_WORKSPACE/.m2/repository" >> $GITHUB_ENV
+        mkdir -p $GITHUB_WORKSPACE/.m2/repository
     - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      run: mvn -B package -Dmaven.test.skip=true
     - name: Run tests
-      run: mvn test jacoco:report
+      run: mvn test
+    - name: Generate JaCoCo report
+      run: mvn jacoco:report
     - name: Upload report
       uses: actions/upload-artifact@v3
       with:

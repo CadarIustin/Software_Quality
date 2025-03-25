@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [ testing ]
 
+permissions:
+  contents: write
+  checks: write
+  pull-requests: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -25,11 +30,59 @@ jobs:
     - name: Build with Maven
       run: mvn -B package -Dmaven.test.skip=true
     - name: Run tests
+      id: run_tests
       run: mvn test
+      continue-on-error: true
+    - name: Check test status
+      id: check_tests
+      run: |
+        if [ "${{ steps.run_tests.outcome }}" == "success" ]; then
+          echo "All tests passed!"
+          echo "tests_passed=true" >> $GITHUB_OUTPUT
+        else
+          echo "Tests failed!"
+          echo "tests_passed=false" >> $GITHUB_OUTPUT
+          exit 1
+        fi
     - name: Generate JaCoCo report
+      if: steps.check_tests.outputs.tests_passed == 'true'
       run: mvn jacoco:report
     - name: Upload report
+      if: steps.check_tests.outputs.tests_passed == 'true'
       uses: actions/upload-artifact@v4
       with:
         name: jacoco-report
         path: target/site/jacoco/
+
+  promote-to-acceptance:
+    needs: test
+    runs-on: ubuntu-latest
+    if: ${{ success() && github.event_name == 'push' }}
+    
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        ref: testing
+    
+    - name: Configure Git
+      run: |
+        git config user.name "GitHub Actions Bot"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+    
+    - name: Merge testing into acceptance
+      run: |
+        # Fetch the latest from all branches
+        git fetch origin
+        
+        # Check out the acceptance branch
+        git checkout acceptance || git checkout -b acceptance origin/acceptance
+        
+        # Update acceptance branch with latest changes
+        git pull origin acceptance
+        
+        # Merge the testing branch that triggered this workflow
+        git merge --no-ff origin/testing -m "Auto-merge testing to acceptance after successful tests [skip ci]"
+        
+        # Push changes to acceptance branch
+        git push origin acceptance

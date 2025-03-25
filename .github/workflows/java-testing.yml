@@ -62,27 +62,64 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        fetch-depth: 0
-        ref: testing
+        fetch-depth: 0  # Full history for proper merging
     
     - name: Configure Git
       run: |
         git config user.name "GitHub Actions Bot"
         git config user.email "github-actions[bot]@users.noreply.github.com"
     
+    - name: Fetch all branches
+      run: |
+        git fetch --all --prune
+    
+    - name: Check if acceptance branch exists
+      id: check_branch
+      run: |
+        if git show-ref --verify --quiet refs/remotes/origin/acceptance; then
+          echo "acceptance_exists=true" >> $GITHUB_OUTPUT
+        else
+          echo "acceptance_exists=false" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Create acceptance branch if it doesn't exist
+      if: steps.check_branch.outputs.acceptance_exists == 'false'
+      run: |
+        # Create acceptance branch from testing
+        echo "Creating acceptance branch from testing branch"
+        git checkout -b acceptance
+        git push -u origin acceptance
+    
     - name: Merge testing into acceptance
       run: |
-        # Fetch the latest from all branches
-        git fetch origin
+        # Get current commit hash of testing branch
+        TESTING_HASH=$(git rev-parse origin/testing)
+        echo "Current testing branch commit: $TESTING_HASH"
         
-        # Check out the acceptance branch
+        # Checkout acceptance branch
         git checkout acceptance || git checkout -b acceptance origin/acceptance
         
-        # Update acceptance branch with latest changes
+        # Update local acceptance branch
         git pull origin acceptance
         
-        # Merge the testing branch that triggered this workflow
+        # Check if testing is already merged into acceptance
+        if git merge-base --is-ancestor $TESTING_HASH HEAD; then
+          echo "Testing branch is already up-to-date with acceptance. No merge needed."
+          exit 0
+        fi
+        
+        # Perform the merge with proper history preservation
+        echo "Merging testing branch into acceptance"
         git merge --no-ff origin/testing -m "Auto-merge testing to acceptance after successful tests [skip ci]"
         
         # Push changes to acceptance branch
         git push origin acceptance
+        
+        echo "Successfully merged testing branch into acceptance branch"
+    
+    - name: Generate merge report
+      if: success()
+      run: |
+        echo "### Merge Results" >> $GITHUB_STEP_SUMMARY
+        echo "✅ Successfully merged testing branch into acceptance branch" >> $GITHUB_STEP_SUMMARY
+        echo "All tests passed and changes have been promoted" >> $GITHUB_STEP_SUMMARY

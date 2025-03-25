@@ -54,6 +54,26 @@ public class TextItem extends SlideItem {
 		return attrStr;
 	}
 
+	/**
+	 * Creates an AttributedString for the TextItem and applies the given style
+	 * @param style the style to apply
+	 * @param x the x position
+	 * @param y the y position
+	 * @return the AttributedString with the style applied
+	 */
+	public AttributedString getAttributedText(Style style, float x, float y) {
+		return getAttributedString(style, 1.0f);
+	}
+
+	/**
+	 * Builds a string representation of this TextItem
+	 * @param builder the StringBuilder to append to
+	 * @param indent the indentation string to use
+	 */
+	public void buildString(StringBuilder builder, String indent) {
+		builder.append(indent).append(getText());
+	}
+
 // give the bounding box of the item
 	public Rectangle getBoundingBox(Graphics g, ImageObserver observer, 
 			float scale, Style myStyle) {

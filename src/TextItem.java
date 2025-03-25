@@ -1,17 +1,19 @@
+package jabberpoint;
+
 import java.awt.Rectangle;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.font.TextLayout;
-import java.awt.font.TextAttribute;
-import java.awt.font.LineBreakMeasurer;
 import java.awt.font.FontRenderContext;
+import java.awt.font.LineBreakMeasurer;
+import java.awt.font.TextAttribute;
+import java.awt.font.TextLayout;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.ImageObserver;
 import java.text.AttributedString;
-import java.util.List;
-import java.util.Iterator;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /** <p>A tekst item.</p>
  * <p>A TextItem has drawingfunctionality.</p>
@@ -50,6 +52,26 @@ public class TextItem extends SlideItem {
 		AttributedString attrStr = new AttributedString(getText());
 		attrStr.addAttribute(TextAttribute.FONT, style.getFont(scale), 0, text.length());
 		return attrStr;
+	}
+
+	/**
+	 * Creates an AttributedString for the TextItem and applies the given style
+	 * @param style the style to apply
+	 * @param x the x position
+	 * @param y the y position
+	 * @return the AttributedString with the style applied
+	 */
+	public AttributedString getAttributedText(Style style, float x, float y) {
+		return getAttributedString(style, 1.0f);
+	}
+
+	/**
+	 * Builds a string representation of this TextItem
+	 * @param builder the StringBuilder to append to
+	 * @param indent the indentation string to use
+	 */
+	public void buildString(StringBuilder builder, String indent) {
+		builder.append(indent).append(getText());
 	}
 
 // give the bounding box of the item

@@ -1,3 +1,5 @@
+package jabberpoint;
+
 import javax.swing.JOptionPane;
 
 import java.io.IOException;

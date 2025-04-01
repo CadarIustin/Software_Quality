@@ -3,6 +3,7 @@ package jabberpoint;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import java.awt.Color;
 
 /**
  * Unit test for the TextItem class
@@ -33,7 +34,7 @@ public class TextItemTest {
     void testGetAttributedText() {
         // Since AttributedString is not easy to test directly, we can at least verify it doesn't throw an exception
         assertDoesNotThrow(() -> {
-            textItem.getAttributedText(new Style(0, 0, 0, 0, 0), 0, 0);
+            textItem.getAttributedText(new Style(0, Color.BLACK, 12, 0), 0, 0);
         }, "getAttributedText should not throw exceptions");
     }
     

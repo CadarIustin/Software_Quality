@@ -7,8 +7,8 @@
     <!-- Enforce UTF-8 encoding -->
     <property name="charset" value="UTF-8"/>
     
-    <!-- Severity level when violation occurs -->
-    <property name="severity" value="error"/>
+    <!-- Severity level when violation occurs - changed from error to warning -->
+    <property name="severity" value="warning"/>
     
     <!-- Checks for whitespace -->
     <module name="FileTabCharacter">

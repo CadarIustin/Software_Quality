@@ -21,11 +21,8 @@ jobs:
       with:
         java-version: '11'
         distribution: 'temurin'
-        cache: maven
-    - name: Configure Maven for cross-platform support
-      run: |
-        echo "MAVEN_OPTS=-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$GITHUB_WORKSPACE/.m2/repository" >> $GITHUB_ENV
-        mkdir -p $GITHUB_WORKSPACE/.m2/repository
+        cache: 'maven'
+    # Removed problematic custom Maven configuration that causes cache issues
     - name: Check code style
       id: checkstyle
       run: mvn validate
@@ -48,11 +45,8 @@ jobs:
       with:
         java-version: '11'
         distribution: 'temurin'
-        cache: maven
-    - name: Configure Maven for cross-platform support
-      run: |
-        echo "MAVEN_OPTS=-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$GITHUB_WORKSPACE/.m2/repository" >> $GITHUB_ENV
-        mkdir -p $GITHUB_WORKSPACE/.m2/repository
+        cache: 'maven'
+    # Removed problematic custom Maven configuration that causes cache issues
     - name: Build with Maven
       run: mvn -B package -Dmaven.test.skip=true
     - name: Run tests

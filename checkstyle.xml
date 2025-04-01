@@ -79,17 +79,14 @@
         <module name="EmptyBlock"/>
         <module name="AvoidNestedBlocks"/>
         
-        <!-- Ensure proper Javadoc for public members -->
+        <!-- Ensure proper Javadoc for public members - using updated configuration -->
         <module name="JavadocMethod">
-            <property name="accessModifiers" value="public"/>
             <property name="allowMissingParamTags" value="true"/>
             <property name="allowMissingReturnTag" value="true"/>
         </module>
-        <module name="JavadocType">
-            <property name="accessModifiers" value="public"/>
-        </module>
+        <module name="JavadocType"/>
         <module name="JavadocVariable">
-            <property name="accessModifiers" value="public"/>
+            <property name="scope" value="public"/>
         </module>
         
         <!-- Miscellaneous other checks -->

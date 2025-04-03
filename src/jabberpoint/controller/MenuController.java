@@ -13,6 +13,10 @@ import javax.swing.JOptionPane;
 import java.awt.event.KeyEvent;
 
 import jabberpoint.model.Presentation;
+import jabberpoint.model.Style;
+import jabberpoint.util.DefaultTheme;
+import jabberpoint.util.DarkTheme;
+import jabberpoint.util.ThemeStrategy;
 import jabberpoint.util.XMLLoader;
 import jabberpoint.util.XMLSaver;
 import jabberpoint.view.AboutBox;
@@ -34,6 +38,9 @@ public class MenuController extends MenuBar {
     private static final String PREV = "Prev";
     private static final String SAVE = "Save";
     private static final String VIEW = "View";
+    private static final String THEMES = "Themes";
+    private static final String DEFAULT_THEME = "Default Theme";
+    private static final String DARK_THEME = "Dark Theme";
     
     private static final String TESTFILE = "test.xml";
     private static final String SAVEFILE = "presentation.xml";
@@ -104,6 +111,29 @@ public class MenuController extends MenuBar {
         });
         
         add(viewMenu);
+        
+        // Add Themes menu
+        Menu themesMenu = new Menu(THEMES);
+        
+        themesMenu.add(menuItem = new MenuItem(DEFAULT_THEME));
+        menuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                ThemeStrategy theme = new DefaultTheme();
+                theme.applyTheme();
+                presentation.notifyObservers();
+            }
+        });
+        
+        themesMenu.add(menuItem = new MenuItem(DARK_THEME));
+        menuItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                ThemeStrategy theme = new DarkTheme();
+                theme.applyTheme();
+                presentation.notifyObservers();
+            }
+        });
+        
+        add(themesMenu);
         
         Menu helpMenu = new Menu(HELP);
         helpMenu.add(menuItem = mkMenuItem(ABOUT));

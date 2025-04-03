@@ -8,7 +8,6 @@ import java.awt.Rectangle;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
-
 /** <p>SlideViewerComponent is a graphical component that can show slides.</p>
  * @author Ian F. Darwin, ian@darwinsys.com, Gert Florijn, Sylvia Stuurman
  * @version 1.1 2002/12/17 Gert Florijn
@@ -17,9 +16,10 @@ import javax.swing.JFrame;
  * @version 1.4 2007/07/16 Sylvia Stuurman
  * @version 1.5 2010/03/03 Sylvia Stuurman
  * @version 1.6 2014/05/16 Sylvia Stuurman
+ * @version 1.7 2025/04/03 Iustin Cadar (Modified to implement PresentationObserver for Observer pattern)
  */
 
-public class SlideViewerComponent extends JComponent {
+public class SlideViewerComponent extends JComponent implements PresentationObserver {
 		
 	private Slide slide; // current slide
 	private Font labelFont = null; // font for labels
@@ -41,24 +41,29 @@ public class SlideViewerComponent extends JComponent {
 		presentation = pres;
 		labelFont = new Font(FONTNAME, FONTSTYLE, FONTHEIGHT);
 		this.frame = frame;
+		
+		// Register as an observer
+		if (presentation != null) {
+			presentation.registerObserver(this);
+		}
 	}
 
 	public Dimension getPreferredSize() {
 		return new Dimension(Slide.WIDTH, Slide.HEIGHT);
 	}
 
+	@Override
 	public void update(Presentation presentation, Slide data) {
 		if (data == null) {
 			repaint();
 			return;
 		}
-		this.presentation = presentation;
 		this.slide = data;
 		repaint();
 		frame.setTitle(presentation.getTitle());
 	}
 
-// draw the slide
+//Draw the slide
 	public void paintComponent(Graphics g) {
 		g.setColor(BGCOLOR);
 		g.fillRect(0, 0, getSize().width, getSize().height);
@@ -67,8 +72,8 @@ public class SlideViewerComponent extends JComponent {
 		}
 		g.setFont(labelFont);
 		g.setColor(COLOR);
-		g.drawString("Slide " + (1 + presentation.getSlideNumber()) + " of " +
-                 presentation.getSize(), XPOS, YPOS);
+		g.drawString("Slide " + (1 + presentation.getSlideNumber()) +
+				" of " + presentation.getSize(), XPOS, YPOS);
 		Rectangle area = new Rectangle(0, YPOS, getWidth(), (getHeight() - YPOS));
 		slide.draw(g, area, this);
 	}

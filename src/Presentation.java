@@ -1,6 +1,7 @@
 package jabberpoint;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>Presentation maintains the slides in the presentation.</p>
@@ -12,13 +13,15 @@ import java.util.ArrayList;
  * @version 1.4 2007/07/16 Sylvia Stuurman
  * @version 1.5 2010/03/03 Sylvia Stuurman
  * @version 1.6 2014/05/16 Sylvia Stuurman
+ * @version 1.7 2025/04/03 Iustin Cadar (Modified to implement PresentationSubject for Observer pattern)
  */
 
-public class Presentation {
+public class Presentation implements PresentationSubject {
 	private String showTitle; // title of the presentation
 	private ArrayList<Slide> showList = null; // an ArrayList with Slides
 	private int currentSlideNumber = 0; // the slidenummer of the current Slide
 	private SlideViewerComponent slideViewComponent = null; // the viewcomponent of the Slides
+	private List<PresentationObserver> observers = new ArrayList<>(); // list of observers
 
 	public Presentation() {
 		slideViewComponent = null;
@@ -40,10 +43,15 @@ public class Presentation {
 
 	public void setTitle(String nt) {
 		showTitle = nt;
+		notifyObservers(); // Notify observers when title changes
 	}
 
 	public void setShowView(SlideViewerComponent slideViewerComponent) {
 		this.slideViewComponent = slideViewerComponent;
+		// Add slideViewerComponent as an observer if it implements PresentationObserver
+		if (slideViewerComponent instanceof PresentationObserver) {
+			registerObserver((PresentationObserver) slideViewerComponent);
+		}
 	}
 
 	// give the number of the current slide
@@ -54,9 +62,7 @@ public class Presentation {
 	// change the current slide number and signal it to the window
 	public void setSlideNumber(int number) {
 		currentSlideNumber = number;
-		if (slideViewComponent != null) {
-			slideViewComponent.update(this, getCurrentSlide());
-		}
+		notifyObservers(); // Notify observers when slide changes
 	}
 
 	// go to the previous slide unless your at the beginning of the presentation
@@ -82,6 +88,7 @@ public class Presentation {
 	// Add a slide to the presentation
 	public void append(Slide slide) {
 		showList.add(slide);
+		notifyObservers(); // Notify observers when a slide is added
 	}
 
 	// Get a slide with a certain slidenumber
@@ -99,5 +106,32 @@ public class Presentation {
 
 	public void exit(int n) {
 		System.exit(n);
+	}
+	
+	// Observer pattern methods
+	
+	@Override
+	public void registerObserver(PresentationObserver observer) {
+		if (!observers.contains(observer)) {
+			observers.add(observer);
+		}
+	}
+	
+	@Override
+	public void removeObserver(PresentationObserver observer) {
+		observers.remove(observer);
+	}
+	
+	@Override
+	public void notifyObservers() {
+		Slide currentSlide = getCurrentSlide();
+		for (PresentationObserver observer : observers) {
+			observer.update(this, currentSlide);
+		}
+		
+		// For backward compatibility
+		if (slideViewComponent != null && !observers.contains(slideViewComponent)) {
+			slideViewComponent.update(this, currentSlide);
+		}
 	}
 }

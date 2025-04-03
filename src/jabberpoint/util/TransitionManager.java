@@ -44,8 +44,12 @@ public class TransitionManager {
         
         // Create snapshots of the slides
         Rectangle area = new Rectangle(0, 0, viewerComponent.getWidth(), viewerComponent.getHeight());
-        fromImage = new BufferedImage(viewerComponent.getWidth(), viewerComponent.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        toImage = new BufferedImage(viewerComponent.getWidth(), viewerComponent.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        fromImage = new BufferedImage(Math.max(1, viewerComponent.getWidth()), 
+                                     Math.max(1, viewerComponent.getHeight()), 
+                                     BufferedImage.TYPE_INT_ARGB);
+        toImage = new BufferedImage(Math.max(1, viewerComponent.getWidth()), 
+                                   Math.max(1, viewerComponent.getHeight()), 
+                                   BufferedImage.TYPE_INT_ARGB);
         
         if (fromSlide != null) {
             fromSlide.draw(fromImage.createGraphics(), area, viewerComponent);

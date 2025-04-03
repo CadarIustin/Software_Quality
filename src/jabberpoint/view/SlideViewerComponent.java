@@ -6,6 +6,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 
 import jabberpoint.model.Observer;
 import jabberpoint.model.Presentation;
@@ -31,14 +32,16 @@ public class SlideViewerComponent extends JComponent implements Observer {
     private Presentation presentation;
     private TransitionManager transitionManager;
     private boolean inTransition = false;
+    private JFrame frame;
 
-    public SlideViewerComponent(Presentation pres) {
+    public SlideViewerComponent(Presentation pres, JFrame frame) {
         this.presentation = pres;
         this.labelFont = new Font(FONTNAME, FONTSTYLE, FONTSIZE);
         this.presentation.addObserver(this);
         this.slide = null;
         this.transitionManager = new TransitionManager(this);
-        update();
+        this.frame = frame;
+        updatePresentation();
     }
 
     @Override
@@ -47,18 +50,31 @@ public class SlideViewerComponent extends JComponent implements Observer {
     }
 
     @Override
-    public void update() {
-        if (presentation.getCurrentSlide() != slide) {
-            Slide previousSlide = slide;
-            slide = presentation.getCurrentSlide();
-            
-            // Start transition if both slides are available and we're not already in a transition
-            if (previousSlide != null && slide != null && !inTransition) {
-                inTransition = true;
-                transitionManager.startTransition(previousSlide, slide);
-            }
+    public void update(Presentation presentation, Slide slide) {
+        this.presentation = presentation;
+        Slide previousSlide = this.slide;
+        this.slide = slide;
+        
+        // Update frame title if available
+        if (frame != null && presentation != null) {
+            frame.setTitle(presentation.getTitle());
         }
+        
+        // Start transition if both slides are available and we're not already in a transition
+        if (previousSlide != null && slide != null && !inTransition) {
+            inTransition = true;
+            transitionManager.startTransition(previousSlide, slide);
+        }
+        
         repaint();
+    }
+    
+    // Helper method to update the current presentation state
+    private void updatePresentation() {
+        if (presentation != null) {
+            this.slide = presentation.getCurrentSlide();
+            repaint();
+        }
     }
 
     @Override

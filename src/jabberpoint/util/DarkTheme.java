@@ -5,7 +5,7 @@ import java.awt.Font;
 import jabberpoint.model.Style;
 
 public class DarkTheme implements ThemeStrategy {
-    private static final String FONTNAME = "Arial";
+    private static final String FONTNAME = Style.FontName.SANS_SERIF.getName();
     
     @Override
     public void applyTheme() {
@@ -30,5 +30,14 @@ public class DarkTheme implements ThemeStrategy {
     @Override
     public String getThemeName() {
         return "Dark";
+    }
+    
+    @Override
+    public Style getStyle(int level) {
+        // First ensure styles are applied
+        if (Style.getStyle(level) == null) {
+            applyTheme();
+        }
+        return Style.getStyle(level);
     }
 }

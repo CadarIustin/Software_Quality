@@ -27,11 +27,28 @@ public class Style {
     private static final int DEFAULT_LEADING = 20;
     private static final int DEFAULT_INDENT = 10;
     
+    public enum FontName {
+        SERIF("Serif"), 
+        SANS_SERIF("SansSerif"), 
+        MONOSPACED("Monospaced");
+        
+        private final String fontName;
+        
+        FontName(String fontName) {
+            this.fontName = fontName;
+        }
+        
+        public String getName() {
+            return fontName;
+        }
+    }
+    
     public int indent;
     public int leading;
     public Color color;
     private Font font;
     private int fontSize;
+    private String fontName;
     
     /**
      * Create a new style
@@ -47,6 +64,7 @@ public class Style {
         this.leading = leading;
         this.color = color;
         this.fontSize = fontSize;
+        this.fontName = fontName;
         this.font = new Font(fontName, style, fontSize);
     }
     
@@ -64,6 +82,37 @@ public class Style {
      */
     public Font getFont(float scale) {
         return font.deriveFont(fontSize * scale);
+    }
+    
+    /**
+     * Get the font size
+     * @return The font size
+     */
+    public int getFontSize() {
+        return fontSize;
+    }
+    
+    /**
+     * Get the color
+     * @return The color
+     */
+    public Color getColor() {
+        return color;
+    }
+    
+    /**
+     * Get the font name
+     * @return The font name as a FontName enum
+     */
+    public FontName getFontName() {
+        // Convert the string font name to FontName enum
+        for (FontName name : FontName.values()) {
+            if (name.getName().equalsIgnoreCase(fontName)) {
+                return name;
+            }
+        }
+        // Default to SANS_SERIF if no match
+        return FontName.SANS_SERIF;
     }
     
     /**

@@ -8,9 +8,9 @@ import java.awt.Rectangle;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
-import jabberpoint.model.Observer;
 import jabberpoint.model.Presentation;
 import jabberpoint.model.Slide;
+import jabberpoint.model.Observer;
 import jabberpoint.util.TransitionManager;
 
 /** 
@@ -41,7 +41,7 @@ public class SlideViewerComponent extends JComponent implements Observer {
         this.slide = null;
         this.transitionManager = new TransitionManager(this);
         this.frame = frame;
-        updatePresentation();
+        update(presentation, null);
     }
 
     @Override
@@ -50,10 +50,10 @@ public class SlideViewerComponent extends JComponent implements Observer {
     }
 
     @Override
-    public void update(Presentation presentation, Slide slide) {
+    public void update(Presentation presentation, Slide data) {
         this.presentation = presentation;
         Slide previousSlide = this.slide;
-        this.slide = slide;
+        this.slide = data;
         
         // Update frame title if available
         if (frame != null && presentation != null) {
@@ -69,53 +69,75 @@ public class SlideViewerComponent extends JComponent implements Observer {
         repaint();
     }
     
-    // Helper method to update the current presentation state
-    private void updatePresentation() {
-        if (presentation != null) {
-            this.slide = presentation.getCurrentSlide();
-            repaint();
+    public void startTransition() {
+        inTransition = true;
+        
+        Slide fromSlide = this.slide;
+        
+        Slide toSlide = null;
+        int currentNumber = presentation.getSlideNumber();
+        if (currentNumber < presentation.getSize() - 1) {
+            toSlide = presentation.getSlide(currentNumber + 1);
+        } else {
+            toSlide = fromSlide;
         }
+        
+        transitionManager.startTransition(fromSlide, toSlide);
+    }
+
+    public void stopTransition() {
+        inTransition = false;
+        repaint();
+    }
+
+    public boolean isInTransition() {
+        return inTransition;
+    }
+    
+    /**
+     * Called by TransitionManager when a transition animation completes
+     */
+    public void finishTransition() {
+        inTransition = false;
+        repaint();
+    }
+
+    /**
+     * Cycles to the next transition type
+     */
+    public void cycleTransitionType() {
+        transitionManager.cycleTransition();
+    }
+    
+    /**
+     * Get the name of the current transition effect
+     * @return The name of the current transition effect
+     */
+    public String getCurrentTransitionName() {
+        return transitionManager.getCurrentTransitionName();
+    }
+
+    public void setSlide(Slide slide) {
+        this.slide = slide;
+        repaint();
+    }
+
+    public Slide getSlide() {
+        return slide;
     }
 
     @Override
     public void paintComponent(Graphics g) {
         g.setColor(BGCOLOR);
         g.fillRect(0, 0, getSize().width, getSize().height);
-        
-        if (inTransition && transitionManager.isTransitionActive()) {
-            // Draw the transition animation
-            Rectangle area = new Rectangle(0, YPOS, getWidth(), (getHeight() - YPOS));
-            transitionManager.drawTransition(g, area, this);
-            return;
-        }
-        
         if (presentation.getSlideNumber() < 0 || slide == null) {
             return;
         }
-        
         g.setFont(labelFont);
         g.setColor(COLOR);
-        g.drawString("Slide " + (1 + presentation.getSlideNumber()) + " of " +
-                    presentation.getSize(), XPOS, YPOS);
-        
+        g.drawString("Slide " + (1 + presentation.getSlideNumber()) + 
+                     " of " + presentation.getSize(), XPOS, YPOS);
         Rectangle area = new Rectangle(0, YPOS, getWidth(), (getHeight() - YPOS));
         slide.draw(g, area, this);
-    }
-    
-    public TransitionManager getTransitionManager() {
-        return transitionManager;
-    }
-    
-    public void finishTransition() {
-        inTransition = false;
-        repaint();
-    }
-    
-    public void cycleTransitionType() {
-        transitionManager.cycleTransition();
-    }
-    
-    public String getCurrentTransitionName() {
-        return transitionManager.getCurrentTransitionName();
     }
 }

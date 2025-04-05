@@ -3,6 +3,9 @@ package jabberpoint;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import jabberpoint.model.Slide;
+import jabberpoint.model.SlideItem;
+import jabberpoint.model.TextItem;
 
 /**
  * Unit test for the Slide class
@@ -53,13 +56,10 @@ public class SlideTest {
     
     @Test
     void testGetSlideItemOutOfBounds() {
-        assertThrows(ArrayIndexOutOfBoundsException.class, () -> {
-            slide.getSlideItem(0); // No items yet, should throw exception
-        }, "Getting item from empty slide should throw exception");
+        assertNull(slide.getSlideItem(0), "Getting item from empty slide should return null");
         
         slide.append(new TextItem(1, "Test"));
-        assertThrows(ArrayIndexOutOfBoundsException.class, () -> {
-            slide.getSlideItem(1); // Only one item, index 1 is out of bounds
-        }, "Getting item with invalid index should throw exception");
+        assertNull(slide.getSlideItem(1), "Getting item with invalid index should return null");
+        assertNull(slide.getSlideItem(-1), "Getting item with negative index should return null");
     }
 }

@@ -1,5 +1,3 @@
-package jabberpoint; 
- 
 /** A built in demo-presentation
  * @author Ian F. Darwin, ian@darwinsys.com, Gert Florijn, Sylvia Stuurman
  * @version 1.1 2002/12/17 Gert Florijn
@@ -10,9 +8,14 @@ package jabberpoint;
  * @version 1.6 2014/05/16 Sylvia Stuurman
  */
 
+import java.io.IOException;
+import jabberpoint.model.Presentation;
+import jabberpoint.model.Slide;
+import jabberpoint.model.BitmapItem;
+
 class DemoPresentation extends Accessor {
 
-	public void loadFile(Presentation presentation, String unusedFilename) {
+	public void loadFile(Presentation presentation, String unusedFilename) throws IOException {
 		presentation.setTitle("Demo Presentation");
 		Slide slide;
 		slide = new Slide();
@@ -27,7 +30,7 @@ class DemoPresentation extends Accessor {
 		slide.append(3, "Next slide: PgDn or Enter");
 		slide.append(3, "Previous slide: PgUp or up-arrow");
 		slide.append(3, "Quit: q or Q");
-		presentation.append(slide);
+		presentation.addSlide(slide);
 
 		slide = new Slide();
 		slide.setTitle("Demonstration of levels and stijlen");
@@ -38,7 +41,7 @@ class DemoPresentation extends Accessor {
 		slide.append(2, "Level 2 has style number  2");
 		slide.append(3, "This is how level 3 looks like");
 		slide.append(4, "And this is level 4");
-		presentation.append(slide);
+		presentation.addSlide(slide);
 
 		slide = new Slide();
 		slide.setTitle("The third slide");
@@ -47,10 +50,10 @@ class DemoPresentation extends Accessor {
 		slide.append(1, " ");
 		slide.append(1, "This is the end of the presentation.");
 		slide.append(new BitmapItem(1, "JabberPoint.jpg"));
-		presentation.append(slide);
+		presentation.addSlide(slide);
 	}
 
-	public void saveFile(Presentation presentation, String unusedFilename) {
+	public void saveFile(Presentation presentation, String unusedFilename) throws IOException {
 		throw new IllegalStateException("Save As->Demo! called");
 	}
 }

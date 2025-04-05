@@ -27,7 +27,7 @@ public class SlideViewerFrame extends JFrame {
     public SlideViewerFrame(Presentation presentation) {
         super(JABTITLE);
         
-        slideViewComponent = new SlideViewerComponent(presentation);
+        slideViewComponent = new SlideViewerComponent(presentation, this);
         presentationTimer = new PresentationTimer();
         presentation.setSlideNumber(0);
         
@@ -39,7 +39,7 @@ public class SlideViewerFrame extends JFrame {
     public SlideViewerFrame(String title, Presentation presentation) {
         super(title);
         
-        slideViewComponent = new SlideViewerComponent(presentation);
+        slideViewComponent = new SlideViewerComponent(presentation, this);
         presentationTimer = new PresentationTimer();
         presentation.setSlideNumber(0);
         

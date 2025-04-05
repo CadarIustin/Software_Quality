@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.io.IOException;
 
 import javax.swing.JOptionPane;
+import jabberpoint.model.Presentation;
 
 /** <p>The controller for the menu</p>
  * @author Ian F. Darwin, ian@darwinsys.com, Gert Florijn, Sylvia Stuurman
@@ -102,7 +103,7 @@ public class MenuController extends MenuBar {
 		viewMenu.add(menuItem = mkMenuItem(PREV));
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent actionEvent) {
-				presentation.prevSlide();
+				presentation.previousSlide();
 			}
 		});
 		viewMenu.add(menuItem = mkMenuItem(GOTO));

@@ -1,8 +1,11 @@
-package jabberpoint;
-
 import javax.swing.JOptionPane;
-
 import java.io.IOException;
+
+import jabberpoint.model.Presentation;
+import jabberpoint.model.Style;
+import jabberpoint.util.DemoLoader;
+import jabberpoint.util.XMLLoader;
+import jabberpoint.view.SlideViewerFrame;
 
 /** JabberPoint Main Programma
  * <p>This program is distributed under the terms of the accompanying
@@ -31,9 +34,11 @@ public class JabberPoint {
 		new SlideViewerFrame(JABVERSION, presentation);
 		try {
 			if (argv.length == 0) { // een demo presentatie
-				Accessor.getDemoAccessor().loadFile(presentation, "");
+				DemoLoader demoLoader = new DemoLoader();
+				demoLoader.loadPresentation(presentation, "");
 			} else {
-				new XMLAccessor().loadFile(presentation, argv[0]);
+				XMLLoader xmlLoader = new XMLLoader();
+				xmlLoader.loadPresentation(presentation, argv[0]);
 			}
 			presentation.setSlideNumber(0);
 		} catch (IOException ex) {

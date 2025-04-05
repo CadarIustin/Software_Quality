@@ -59,7 +59,7 @@ public class HTMLExporter implements PresentationExporter {
                         out.println(((TextItem) item).getText());
                     } else if (item instanceof BitmapItem) {
                         BitmapItem bitmapItem = (BitmapItem) item;
-                        out.println("<img src=\"" + bitmapItem.getImageFile() + "\" alt=\"Slide image\">");
+                        out.println("<img src=\"" + bitmapItem.getName() + "\" alt=\"Slide image\">");
                     } else {
                         out.println(item.toString());
                     }

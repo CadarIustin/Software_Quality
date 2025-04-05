@@ -1,7 +1,8 @@
-package jabberpoint;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import jabberpoint.model.Observer;
+import jabberpoint.view.SlideViewerComponent;
 
 /**
  * <p>Presentation maintains the slides in the presentation.</p>
@@ -20,16 +21,17 @@ public class Presentation implements PresentationSubject {
 	private String showTitle; // title of the presentation
 	private ArrayList<Slide> showList = null; // an ArrayList with Slides
 	private int currentSlideNumber = 0; // the slidenummer of the current Slide
-	private SlideViewerComponent slideViewComponent = null; // the viewcomponent of the Slides
 	private List<PresentationObserver> observers = new ArrayList<>(); // list of observers
 
 	public Presentation() {
-		slideViewComponent = null;
 		clear();
 	}
 
 	public Presentation(SlideViewerComponent slideViewerComponent) {
-		this.slideViewComponent = slideViewerComponent;
+		// Add slideViewerComponent as an observer if it implements PresentationObserver
+		if (slideViewerComponent instanceof PresentationObserver) {
+			registerObserver((PresentationObserver) slideViewerComponent);
+		}
 		clear();
 	}
 
@@ -47,7 +49,6 @@ public class Presentation implements PresentationSubject {
 	}
 
 	public void setShowView(SlideViewerComponent slideViewerComponent) {
-		this.slideViewComponent = slideViewerComponent;
 		// Add slideViewerComponent as an observer if it implements PresentationObserver
 		if (slideViewerComponent instanceof PresentationObserver) {
 			registerObserver((PresentationObserver) slideViewerComponent);
@@ -126,12 +127,44 @@ public class Presentation implements PresentationSubject {
 	public void notifyObservers() {
 		Slide currentSlide = getCurrentSlide();
 		for (PresentationObserver observer : observers) {
-			observer.update(this, currentSlide);
+			// Create a model.Presentation and model.Slide for the Observer interface
+			jabberpoint.model.Presentation modelPresentation = createModelPresentation();
+			jabberpoint.model.Slide modelSlide = null;
+			if (currentSlide != null) {
+				modelSlide = createModelSlide(currentSlide);
+			}
+			
+			observer.update(modelPresentation, modelSlide);
 		}
-		
-		// For backward compatibility
-		if (slideViewComponent != null && !observers.contains(slideViewComponent)) {
-			slideViewComponent.update(this, currentSlide);
+	}
+
+	// Helper methods to convert between different types
+	private jabberpoint.model.Presentation createModelPresentation() {
+		jabberpoint.model.Presentation modelPres = new jabberpoint.model.Presentation();
+		modelPres.setTitle(this.showTitle);
+		return modelPres;
+	}
+	
+	private jabberpoint.model.Slide createModelSlide(Slide slide) {
+		// Create a model.Slide from our Slide
+		jabberpoint.model.Slide modelSlide = new jabberpoint.model.Slide();
+		modelSlide.setTitle(slide.getTitle());
+		// Copy any necessary properties
+		return modelSlide;
+	}
+
+	// Model Observer pattern implementation
+	@Override
+	public void addObserver(Observer observer) {
+		if (observer instanceof PresentationObserver) {
+			registerObserver((PresentationObserver) observer);
+		}
+	}
+
+	@Override
+	public void removeObserver(Observer observer) {
+		if (observer instanceof PresentationObserver) {
+			removeObserver((PresentationObserver) observer);
 		}
 	}
 }

@@ -1,5 +1,3 @@
-package jabberpoint; 
- 
 import java.io.IOException;
 
 /**

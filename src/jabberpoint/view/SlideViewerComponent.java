@@ -12,6 +12,7 @@ import jabberpoint.model.Presentation;
 import jabberpoint.model.Slide;
 import jabberpoint.model.Observer;
 import jabberpoint.util.TransitionManager;
+import jabberpoint.util.ThemeStrategy;
 
 /** 
  * JabberPoint SlideViewerComponent
@@ -19,11 +20,6 @@ import jabberpoint.util.TransitionManager;
  */
 public class SlideViewerComponent extends JComponent implements Observer {
     private static final long serialVersionUID = 227L;
-    private static final Color BGCOLOR = Color.white;
-    private static final Color COLOR = Color.black;
-    private static final String FONTNAME = "Dialog";
-    private static final int FONTSTYLE = Font.BOLD;
-    private static final int FONTSIZE = 10;
     private static final int XPOS = 1100;
     private static final int YPOS = 20;
 
@@ -33,14 +29,33 @@ public class SlideViewerComponent extends JComponent implements Observer {
     private TransitionManager transitionManager;
     private boolean inTransition = false;
     private JFrame frame;
+    private ThemeStrategy theme;
 
     public SlideViewerComponent(Presentation pres, JFrame frame) {
         this.presentation = pres;
-        this.labelFont = new Font(FONTNAME, FONTSTYLE, FONTSIZE);
+        this.labelFont = new Font("Dialog", Font.BOLD, 10);
         this.presentation.addObserver(this);
         this.slide = null;
         this.transitionManager = new TransitionManager(this);
         this.frame = frame;
+        update(presentation, null);
+    }
+
+    public SlideViewerComponent(Presentation pres, ThemeStrategy theme) {
+        this.presentation = pres;
+        this.theme = theme;
+        // Use the theme for styling
+        if (theme != null) {
+            this.labelFont = new Font(
+                theme.getStyle(0).getFontName().toString(), 
+                Font.BOLD, 
+                theme.getStyle(0).getFontSize());
+        } else {
+            this.labelFont = new Font("Dialog", Font.BOLD, 10);
+        }
+        this.presentation.addObserver(this);
+        this.slide = null;
+        this.transitionManager = new TransitionManager(this);
         update(presentation, null);
     }
 
@@ -125,19 +140,53 @@ public class SlideViewerComponent extends JComponent implements Observer {
     public Slide getSlide() {
         return slide;
     }
+    
+    /**
+     * Get the current presentation
+     * @return The presentation being displayed
+     */
+    public Presentation getPresentation() {
+        return presentation;
+    }
+    
+    /**
+     * Set a new theme for the slide viewer
+     * @param theme The new theme to apply
+     */
+    public void setTheme(ThemeStrategy theme) {
+        this.theme = theme;
+        if (theme != null) {
+            this.labelFont = new Font(
+                theme.getStyle(0).getFontName().toString(), 
+                Font.BOLD, 
+                theme.getStyle(0).getFontSize());
+        }
+        repaint(); // Refresh the view with the new theme
+    }
 
     @Override
     public void paintComponent(Graphics g) {
-        g.setColor(BGCOLOR);
+        if (theme != null) {
+            // Use default background color since Style doesn't have background color
+            g.setColor(Color.white);
+        } else {
+            g.setColor(Color.white);
+        }
         g.fillRect(0, 0, getSize().width, getSize().height);
         if (presentation.getSlideNumber() < 0 || slide == null) {
             return;
         }
         g.setFont(labelFont);
-        g.setColor(COLOR);
+        if (theme != null) {
+            g.setColor(theme.getStyle(0).getColor());
+        } else {
+            g.setColor(Color.black);
+        }
         g.drawString("Slide " + (1 + presentation.getSlideNumber()) + 
                      " of " + presentation.getSize(), XPOS, YPOS);
         Rectangle area = new Rectangle(0, YPOS, getWidth(), (getHeight() - YPOS));
+        
+        // Just use the existing draw method - we'll apply theme styling elsewhere
         slide.draw(g, area, this);
     }
 }

@@ -1,7 +1,6 @@
-package jabberpoint; 
- 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyAdapter;
+import jabberpoint.model.Presentation;
 
 /** <p>This is the KeyController (KeyListener)</p>
  * @author Ian F. Darwin, ian@darwinsys.com, Gert Florijn, Sylvia Stuurman
@@ -31,7 +30,7 @@ public class KeyController extends KeyAdapter {
 			case KeyEvent.VK_PAGE_UP:
 			case KeyEvent.VK_UP:
 			case '-':
-				presentation.prevSlide();
+				presentation.previousSlide();
 				break;
 			case 'q':
 			case 'Q':

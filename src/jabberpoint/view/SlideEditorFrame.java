@@ -16,11 +16,9 @@ public class SlideEditorFrame extends JFrame {
     private static final int PREFERRED_HEIGHT = 400;
     
     private SlideEditorPanel editorPanel;
-    private Presentation presentation;
 
     public SlideEditorFrame(Presentation presentation) {
         super(EDITOR_TITLE);
-        this.presentation = presentation;
         
         editorPanel = new SlideEditorPanel(presentation);
         

@@ -30,6 +30,7 @@ public class JabberPoint {
                 xmlLoader.loadPresentation(presentation, argv[0]);
             }
             presentation.setSlideNumber(0);
+            frame.setVisible(true); // Make the frame visible to the user
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(null,
                     IOERR + ex, JABERR,

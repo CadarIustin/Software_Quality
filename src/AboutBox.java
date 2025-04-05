@@ -1,5 +1,3 @@
-package jabberpoint;
-
 import java.awt.Frame;
 import javax.swing.JOptionPane;
 

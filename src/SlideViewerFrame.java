@@ -1,9 +1,12 @@
-package jabberpoint; 
- 
 import java.awt.Dimension;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowAdapter;
 import javax.swing.JFrame;
+
+import jabberpoint.view.SlideViewerComponent;
+import jabberpoint.controller.KeyController;
+import jabberpoint.controller.MenuController;
+import jabberpoint.model.Presentation;
 
 /**
  * <p>The application window for a slideviewcomponent</p>
@@ -25,8 +28,8 @@ public class SlideViewerFrame extends JFrame {
 	
 	public SlideViewerFrame(String title, Presentation presentation) {
 		super(title);
-		SlideViewerComponent slideViewerComponent = new SlideViewerComponent(presentation, this);
-		presentation.setShowView(slideViewerComponent);
+		SlideViewerComponent slideViewerComponent = new SlideViewerComponent(presentation);
+		// The setShowView is not needed as the SlideViewerComponent now registers itself as an observer
 		setupWindow(slideViewerComponent, presentation);
 	}
 

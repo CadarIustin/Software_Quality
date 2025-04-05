@@ -12,7 +12,6 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
 import jabberpoint.model.BitmapItem;
-import jabberpoint.model.CompositeSlideItem;
 import jabberpoint.model.Presentation;
 import jabberpoint.model.ShapeItem;
 import jabberpoint.model.Slide;

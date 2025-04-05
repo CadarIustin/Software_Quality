@@ -25,7 +25,7 @@ import jabberpoint.util.XMLSaver;
 import jabberpoint.view.AboutBox;
 import jabberpoint.view.SlideEditorFrame;
 
-public class MenuController extends MenuBar {
+public class MenuController extends MenuBar implements ActionListener {
     private static final long serialVersionUID = 227L;
     
     private Frame parent;
@@ -67,95 +67,51 @@ public class MenuController extends MenuBar {
         
         Menu fileMenu = new Menu(FILE);
         fileMenu.add(menuItem = mkMenuItem(OPEN));
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                openPresentation();
-            }
-        });
+        menuItem.addActionListener(this);
         
         fileMenu.add(menuItem = mkMenuItem(NEW));
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                newPresentation();
-            }
-        });
+        menuItem.addActionListener(this);
         
         fileMenu.add(menuItem = mkMenuItem(SAVE));
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                savePresentation();
-            }
-        });
+        menuItem.addActionListener(this);
         
         // Export submenu
         Menu exportMenu = new Menu(EXPORT);
         
         exportMenu.add(menuItem = new MenuItem(EXPORT_HTML));
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                exportPresentation(new HTMLExporter());
-            }
-        });
+        menuItem.addActionListener(this);
         
         exportMenu.add(menuItem = new MenuItem(EXPORT_TEXT));
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                exportPresentation(new TextExporter());
-            }
-        });
+        menuItem.addActionListener(this);
         
         fileMenu.add(exportMenu);
         
         fileMenu.addSeparator();
         
         fileMenu.add(menuItem = mkMenuItem(EXIT));
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                presentation.exit(0);
-            }
-        });
+        menuItem.addActionListener(this);
         
         add(fileMenu);
         
         // Edit menu
         Menu editMenu = new Menu(EDIT);
         editMenu.add(menuItem = mkMenuItem(EDIT_PRESENTATION));
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                openSlideEditor();
-            }
-        });
+        menuItem.addActionListener(this);
         
         add(editMenu);
         
         Menu viewMenu = new Menu(VIEW);
         viewMenu.add(menuItem = mkMenuItem(NEXT));
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                presentation.nextSlide();
-            }
-        });
+        menuItem.addActionListener(this);
         
         viewMenu.add(menuItem = mkMenuItem(PREV));
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                presentation.previousSlide();
-            }
-        });
+        menuItem.addActionListener(this);
         
         viewMenu.add(menuItem = mkMenuItem(GOTO));
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                gotoSlide();
-            }
-        });
+        menuItem.addActionListener(this);
         
         viewMenu.add(menuItem = new MenuItem(CYCLE_TRANSITION));
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                cycleTransition();
-            }
-        });
+        menuItem.addActionListener(this);
         
         add(viewMenu);
         
@@ -163,34 +119,75 @@ public class MenuController extends MenuBar {
         Menu themesMenu = new Menu(THEMES);
         
         themesMenu.add(menuItem = new MenuItem(DEFAULT_THEME));
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                ThemeStrategy theme = new DefaultTheme();
-                theme.applyTheme();
-                presentation.notifyObservers();
-            }
-        });
+        menuItem.addActionListener(this);
         
         themesMenu.add(menuItem = new MenuItem(DARK_THEME));
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                ThemeStrategy theme = new DarkTheme();
-                theme.applyTheme();
-                presentation.notifyObservers();
-            }
-        });
+        menuItem.addActionListener(this);
         
         add(themesMenu);
         
         Menu helpMenu = new Menu(HELP);
         helpMenu.add(menuItem = mkMenuItem(ABOUT));
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                AboutBox.show(parent);
-            }
-        });
+        menuItem.addActionListener(this);
         
         setHelpMenu(helpMenu);
+    }
+    
+    @Override
+    public void actionPerformed(ActionEvent actionEvent) {
+        String command = actionEvent.getActionCommand();
+        
+        switch(command) {
+            case OPEN:
+                openPresentation();
+                break;
+            case NEW:
+                newPresentation();
+                break;
+            case SAVE:
+                savePresentation();
+                break;
+            case EXIT:
+                presentation.exit(0);
+                break;
+            case NEXT:
+                presentation.nextSlide();
+                break;
+            case PREV:
+                presentation.previousSlide();
+                break;
+            case GOTO:
+                gotoSlide();
+                break;
+            case ABOUT:
+                AboutBox.show(parent);
+                break;
+            case EXPORT_HTML:
+                exportPresentation(new HTMLExporter());
+                break;
+            case EXPORT_TEXT:
+                exportPresentation(new TextExporter());
+                break;
+            case EDIT_PRESENTATION:
+                openSlideEditor();
+                break;
+            case CYCLE_TRANSITION:
+                cycleTransition();
+                break;
+            case DEFAULT_THEME:
+                ThemeStrategy theme = new DefaultTheme();
+                theme.applyTheme();
+                presentation.notifyObservers();
+                break;
+            case DARK_THEME:
+                theme = new DarkTheme();
+                theme.applyTheme();
+                presentation.notifyObservers();
+                break;
+            default:
+                // Unknown command - do nothing
+                break;
+        }
     }
 
     public MenuItem mkMenuItem(String name) {
@@ -251,9 +248,15 @@ public class MenuController extends MenuBar {
     }
     
     private void gotoSlide() {
-        String pageNumberStr = JOptionPane.showInputDialog(PAGENR);
-        int pageNumber = Integer.parseInt(pageNumberStr);
-        presentation.setSlideNumber(pageNumber - 1);
+        String pageNumberStr = JOptionPane.showInputDialog((Object)PAGENR);
+        if (pageNumberStr != null && !pageNumberStr.isEmpty()) {
+            try {
+                int pageNumber = Integer.parseInt(pageNumberStr);
+                presentation.setSlideNumber(pageNumber - 1);
+            } catch (NumberFormatException ex) {
+                // Invalid number format, do nothing
+            }
+        }
     }
     
     private void openSlideEditor() {

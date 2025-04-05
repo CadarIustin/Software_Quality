@@ -5,7 +5,7 @@ import java.awt.Font;
 import jabberpoint.model.Style;
 
 public class DefaultTheme implements ThemeStrategy {
-    private static final String FONTNAME = "Helvetica";
+    private static final String FONTNAME = Style.FontName.SANS_SERIF.getName();
     
     @Override
     public void applyTheme() {
@@ -31,5 +31,14 @@ public class DefaultTheme implements ThemeStrategy {
     @Override
     public String getThemeName() {
         return "Default";
+    }
+    
+    @Override
+    public Style getStyle(int level) {
+        // First ensure styles are applied
+        if (Style.getStyle(level) == null) {
+            applyTheme();
+        }
+        return Style.getStyle(level);
     }
 }

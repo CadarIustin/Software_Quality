@@ -52,7 +52,6 @@ public class MenuController extends MenuBar {
     private static final String DARK_THEME = "Dark Theme";
     private static final String CYCLE_TRANSITION = "Cycle Transition";
     
-    private static final String TESTFILE = "test.xml";
     private static final String SAVEFILE = "presentation.xml";
     
     private static final String IOEX = "IO Exception: ";

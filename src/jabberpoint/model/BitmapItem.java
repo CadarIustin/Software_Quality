@@ -19,7 +19,14 @@ public class BitmapItem extends SlideItem {
     super(level);
     imageName = name;
     try {
-      bufferedImage = ImageIO.read(new File(imageName));
+      // Check if the image path already includes a directory
+      if (name != null) {
+        // If the path doesn't already include img/ and doesn't have another directory prefix, add img/
+        if (!name.contains("/") && !name.contains("\\")) {
+          imageName = "img/" + name;
+        }
+        bufferedImage = ImageIO.read(new File(imageName));
+      }
     }
     catch (IOException e) {
       System.err.println(FILE + imageName + NOTFOUND);
@@ -35,6 +42,9 @@ public class BitmapItem extends SlideItem {
   }
 
   public Rectangle getBoundingBox(Graphics g, ImageObserver observer, float scale, Style myStyle) {
+    if (bufferedImage == null) {
+      return new Rectangle();
+    }
     return new Rectangle((int) (myStyle.indent * scale), 0,
         (int) (bufferedImage.getWidth(observer) * scale),
         ((int) (myStyle.leading * scale)) + 
@@ -42,6 +52,9 @@ public class BitmapItem extends SlideItem {
   }
 
   public void draw(int x, int y, float scale, Graphics g, Style myStyle, ImageObserver observer) {
+    if (bufferedImage == null) {
+      return;
+    }
     int width = x + (int) (myStyle.indent * scale);
     int height = y + (int) (myStyle.leading * scale);
     g.drawImage(bufferedImage, width, height,(int) (bufferedImage.getWidth(observer)*scale),

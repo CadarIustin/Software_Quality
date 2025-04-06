@@ -12,7 +12,7 @@ public class Presentation implements Observable {
     public Presentation() {
         this.title = "New Presentation";
         this.slides = new ArrayList<>();
-        this.currentSlideNumber = -1;
+        this.currentSlideNumber = 0; // Initialize to 0 instead of -1 to fix test failures
         this.observers = new ArrayList<>();
     }
 
@@ -55,7 +55,7 @@ public class Presentation implements Observable {
 
     public void clear() {
         slides = new ArrayList<>();
-        setSlideNumber(-1);
+        setSlideNumber(0); // Changed from -1 to 0 to be consistent with constructor
     }
 
     public void addSlide(Slide slide) {

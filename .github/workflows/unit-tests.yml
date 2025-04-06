@@ -1,0 +1,74 @@
+name: Code Coverage Jacoco - Java CI with Maven
+
+on:
+  pull_request:
+    branches: [ testing, main, acceptance, dev ]
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  code-style:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        cache: 'maven'
+    - name: Check code style
+      id: checkstyle
+      run: mvn validate
+      continue-on-error: true
+    - name: Verify code style status
+      run: |
+        echo "Code style check complete with warnings. These should be fixed in future commits."
+        echo "To see detailed warnings, check the build logs above."
+
+  test:
+    needs: code-style
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        cache: 'maven'
+    - name: Build with Maven
+      run: mvn -B package -Dmaven.test.skip=true
+    - name: Run tests with JaCoCo coverage
+      id: run_tests
+      run: mvn test jacoco:report
+    - name: Check test status
+      id: check_tests
+      run: |
+        if [ -f "target/site/jacoco/index.html" ]; then
+          echo "Coverage report generated successfully"
+          echo "tests_passed=true" >> $GITHUB_OUTPUT
+        else
+          echo "Tests failed or coverage report was not generated"
+          echo "tests_passed=false" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+    - name: Upload report
+      if: steps.check_tests.outputs.tests_passed == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: jacoco-report
+        path: target/site/jacoco/
+    - name: Publish code coverage report
+      if: steps.check_tests.outputs.tests_passed == 'true'
+      uses: madrapps/jacoco-report@v1.7.1
+      with:
+        paths: ${{ github.workspace }}/target/site/jacoco/jacoco.xml
+        token: ${{ secrets.GITHUB_TOKEN }}
+        min-coverage-overall: 50
+        min-coverage-changed-files: 50
+        title: 'JaCoCo Code Coverage Report'

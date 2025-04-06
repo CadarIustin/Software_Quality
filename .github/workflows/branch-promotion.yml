@@ -2,7 +2,7 @@ name: Branch Promotion Workflow
 
 on:
   workflow_run:
-    workflows: ["Unit Tests - Java CI with Maven"]
+    workflows: ["Code Coverage Jacoco - Java CI with Maven"]
     types:
       - completed
     branches: [ testing, main ]

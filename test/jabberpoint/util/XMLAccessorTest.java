@@ -27,10 +27,21 @@ public class XMLAccessorTest {
     Path tempDir; // Use a class-level TempDir to ensure it's available for all tests
     
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws IOException {
         xmlAccessor = new XMLAccessor();
         presentation = new Presentation();
         presentation.setTitle("Test Presentation");
+        
+        // Create the presentation.dtd file in the temp directory
+        File dtdFile = tempDir.resolve("presentation.dtd").toFile();
+        String dtdContent = "<!ELEMENT presentation (showtitle, slide*)>\n" +
+                "<!ELEMENT showtitle (#PCDATA)>\n" +
+                "<!ELEMENT slide (title, item*)>\n" +
+                "<!ELEMENT title (#PCDATA)>\n" +
+                "<!ELEMENT item (#PCDATA)>\n" +
+                "<!ATTLIST item kind CDATA #REQUIRED>\n" +
+                "<!ATTLIST item level CDATA #REQUIRED>";
+        Files.writeString(dtdFile.toPath(), dtdContent);
     }
     
     @Test
@@ -38,7 +49,7 @@ public class XMLAccessorTest {
         // Create a simple XML file
         File xmlFile = tempDir.resolve("test.xml").toFile();
         String xmlContent = "<?xml version=\"1.0\"?>\n" +
-                "<!DOCTYPE presentation SYSTEM \"presentation.dtd\">\n" +
+                "<!DOCTYPE presentation SYSTEM \"" + tempDir.resolve("presentation.dtd").toAbsolutePath() + "\">\n" +
                 "<presentation>\n" +
                 "    <showtitle>Test XML Presentation</showtitle>\n" +
                 "    <slide>\n" +
@@ -188,7 +199,7 @@ public class XMLAccessorTest {
         // Create an XML file with an invalid level format
         File xmlFile = tempDir.resolve("invalid_level.xml").toFile();
         String xmlContent = "<?xml version=\"1.0\"?>\n" +
-                "<!DOCTYPE presentation SYSTEM \"presentation.dtd\">\n" +
+                "<!DOCTYPE presentation SYSTEM \"" + tempDir.resolve("presentation.dtd").toAbsolutePath() + "\">\n" +
                 "<presentation>\n" +
                 "    <showtitle>Invalid Level Test</showtitle>\n" +
                 "    <slide>\n" +
@@ -221,7 +232,7 @@ public class XMLAccessorTest {
         // Create an XML file with an unknown item type
         File xmlFile = tempDir.resolve("unknown_type.xml").toFile();
         String xmlContent = "<?xml version=\"1.0\"?>\n" +
-                "<!DOCTYPE presentation SYSTEM \"presentation.dtd\">\n" +
+                "<!DOCTYPE presentation SYSTEM \"" + tempDir.resolve("presentation.dtd").toAbsolutePath() + "\">\n" +
                 "<presentation>\n" +
                 "    <showtitle>Unknown Type Test</showtitle>\n" +
                 "    <slide>\n" +
@@ -251,7 +262,7 @@ public class XMLAccessorTest {
         // Create an XML file with an image that has a path prefix
         File xmlFile = tempDir.resolve("image_prefix.xml").toFile();
         String xmlContent = "<?xml version=\"1.0\"?>\n" +
-                "<!DOCTYPE presentation SYSTEM \"presentation.dtd\">\n" +
+                "<!DOCTYPE presentation SYSTEM \"" + tempDir.resolve("presentation.dtd").toAbsolutePath() + "\">\n" +
                 "<presentation>\n" +
                 "    <showtitle>Image Prefix Test</showtitle>\n" +
                 "    <slide>\n" +

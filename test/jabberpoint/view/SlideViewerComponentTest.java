@@ -5,9 +5,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.Font;
+import java.awt.Color;
 
 import jabberpoint.model.Presentation;
 import jabberpoint.model.Slide;
@@ -85,13 +86,17 @@ public class SlideViewerComponentTest {
         // Mock the getClipBounds method to return a rectangle
         when(mockGraphics.getClipBounds()).thenReturn(new Rectangle(0, 0, 800, 600));
         
+        // Mock font and color methods to prevent NPE
+        when(mockGraphics.getFont()).thenReturn(new Font("SansSerif", Font.PLAIN, 12));
+        when(mockGraphics.getColor()).thenReturn(Color.BLACK);
+        
         // Call paintComponent
         assertDoesNotThrow(() -> {
             slideViewer.paintComponent(mockGraphics);
         });
         
-        // It's difficult to verify what was drawn without making fields accessible
-        // but we can at least verify the method doesn't crash
+        // Verify that at least some drawing methods were called
+        verify(mockGraphics, atLeastOnce()).drawString(anyString(), anyInt(), anyInt());
     }
     
     @Test

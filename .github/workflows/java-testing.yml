@@ -1,4 +1,4 @@
-name: Java CI with Maven
+name: Code Coverage (Jacoco Report) - Java CI with Maven
 
 on:
   push:

@@ -137,4 +137,90 @@ public class XMLAccessorTest {
         BitmapItem loadedBitmap = (BitmapItem) loadedSlide.getSlideItem(0);
         assertEquals("img/JabberPoint.gif", loadedBitmap.getName());
     }
+    
+    @Test
+    public void testLoadPresentationWithInvalidLevelFormat(@TempDir Path tempDir) throws IOException {
+        // Create an XML file with an invalid level format
+        File xmlFile = tempDir.resolve("invalid_level.xml").toFile();
+        String xmlContent = "<?xml version=\"1.0\"?>\n" +
+                "<!DOCTYPE presentation SYSTEM \"presentation.dtd\">\n" +
+                "<presentation>\n" +
+                "    <showtitle>Invalid Level Test</showtitle>\n" +
+                "    <slide>\n" +
+                "        <title>Invalid Level Slide</title>\n" +
+                "        <item level=\"invalid\" kind=\"text\">Invalid Level Item</item>\n" +
+                "    </slide>\n" +
+                "</presentation>";
+        Files.writeString(xmlFile.toPath(), xmlContent);
+        
+        // Load the presentation - should handle the error gracefully
+        xmlAccessor.loadPresentation(presentation, xmlFile.getAbsolutePath());
+        
+        // Verify the presentation was loaded with default level
+        assertEquals("Invalid Level Test", presentation.getTitle());
+        assertEquals(1, presentation.getSize());
+        
+        Slide slide = presentation.getSlide(0);
+        assertEquals("Invalid Level Slide", slide.getTitle());
+        assertEquals(1, slide.getSize());
+        assertTrue(slide.getSlideItem(0) instanceof TextItem);
+        assertEquals("Invalid Level Item", ((TextItem) slide.getSlideItem(0)).getText());
+        assertEquals(1, slide.getSlideItem(0).getLevel()); // Default level is 1
+    }
+    
+    @Test
+    public void testLoadPresentationWithUnknownItemType(@TempDir Path tempDir) throws IOException {
+        // Create an XML file with an unknown item type
+        File xmlFile = tempDir.resolve("unknown_type.xml").toFile();
+        String xmlContent = "<?xml version=\"1.0\"?>\n" +
+                "<!DOCTYPE presentation SYSTEM \"presentation.dtd\">\n" +
+                "<presentation>\n" +
+                "    <showtitle>Unknown Type Test</showtitle>\n" +
+                "    <slide>\n" +
+                "        <title>Unknown Type Slide</title>\n" +
+                "        <item level=\"1\" kind=\"unknown\">Unknown Type Item</item>\n" +
+                "    </slide>\n" +
+                "</presentation>";
+        Files.writeString(xmlFile.toPath(), xmlContent);
+        
+        // Load the presentation - should handle the error gracefully
+        xmlAccessor.loadPresentation(presentation, xmlFile.getAbsolutePath());
+        
+        // Verify the presentation was loaded but the unknown item was ignored
+        assertEquals("Unknown Type Test", presentation.getTitle());
+        assertEquals(1, presentation.getSize());
+        
+        Slide slide = presentation.getSlide(0);
+        assertEquals("Unknown Type Slide", slide.getTitle());
+        assertEquals(0, slide.getSize()); // Unknown item should be ignored
+    }
+    
+    @Test
+    public void testLoadPresentationWithImagePathPrefix(@TempDir Path tempDir) throws IOException {
+        // Create an XML file with an image path that already has the img/ prefix
+        File xmlFile = tempDir.resolve("image_prefix.xml").toFile();
+        String xmlContent = "<?xml version=\"1.0\"?>\n" +
+                "<!DOCTYPE presentation SYSTEM \"presentation.dtd\">\n" +
+                "<presentation>\n" +
+                "    <showtitle>Image Prefix Test</showtitle>\n" +
+                "    <slide>\n" +
+                "        <title>Image Prefix Slide</title>\n" +
+                "        <item level=\"1\" kind=\"image\">JabberPoint.gif</item>\n" +
+                "    </slide>\n" +
+                "</presentation>";
+        Files.writeString(xmlFile.toPath(), xmlContent);
+        
+        // Load the presentation
+        xmlAccessor.loadPresentation(presentation, xmlFile.getAbsolutePath());
+        
+        // Verify the image path has the img/ prefix
+        assertEquals("Image Prefix Test", presentation.getTitle());
+        assertEquals(1, presentation.getSize());
+        
+        Slide slide = presentation.getSlide(0);
+        assertEquals("Image Prefix Slide", slide.getTitle());
+        assertEquals(1, slide.getSize());
+        assertTrue(slide.getSlideItem(0) instanceof BitmapItem);
+        assertEquals("img/JabberPoint.gif", ((BitmapItem) slide.getSlideItem(0)).getName());
+    }
 }

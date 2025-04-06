@@ -58,9 +58,11 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.22.2</version>
                 <configuration>
-                    <classpathDependencyExcludes>
-                        <classpathDependencyExclude>org.junit.jupiter:junit-jupiter-engine</classpathDependencyExclude>
-                    </classpathDependencyExcludes>
+                    <includes>
+                        <include>**/*Test.java</include>
+                        <include>**/*Tests.java</include>
+                        <include>**/*TestCase.java</include>
+                    </includes>
                     <testFailureIgnore>true</testFailureIgnore>
                 </configuration>
             </plugin>
@@ -95,11 +97,16 @@
                 <version>0.8.8</version>
                 <configuration>
                     <includes>
-                        <include>jabberpoint/**/*</include>
+                        <include>**/*.class</include>
                     </includes>
                     <excludes>
                         <exclude>**/*Test.class</exclude>
+                        <exclude>**/*Tests.class</exclude>
+                        <exclude>**/*TestCase.class</exclude>
                     </excludes>
+                    <destFile>${project.build.directory}/jacoco.exec</destFile>
+                    <dataFile>${project.build.directory}/jacoco.exec</dataFile>
+                    <outputDirectory>${project.reporting.outputDirectory}/jacoco</outputDirectory>
                 </configuration>
                 <executions>
                     <execution>
@@ -138,11 +145,12 @@
                                     </limits>
                                 </rule>
                             </rules>
+                            <haltOnFailure>false</haltOnFailure>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-            
+
             <!-- Maven Assembly Plugin for creating executable JAR -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

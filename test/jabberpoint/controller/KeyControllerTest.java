@@ -70,21 +70,17 @@ public class KeyControllerTest {
     
     @Test
     void testExitKeyPressed() {
-        // We can't easily test System.exit, but we can at least verify that
-        // other methods are not called
+        // Create a testable KeyController subclass that overrides exit()
+        TestableKeyController testableController = new TestableKeyController(mockPresentation);
+        
+        // Test 'q' key
         when(mockKeyEvent.getKeyCode()).thenReturn((int)'q');
+        testableController.keyPressed(mockKeyEvent);
         
-        // This will fail with SecurityException if System.exit is actually called
-        // We'd need a SecurityManager to fully test this properly
-        try {
-            System.setSecurityManager(new NoExitSecurityManager());
-            assertThrows(ExitException.class, () -> {
-                keyController.keyPressed(mockKeyEvent);
-            });
-        } finally {
-            System.setSecurityManager(null);
-        }
+        // Verify exit was called
+        assertTrue(testableController.wasExitCalled());
         
+        // Verify other methods were not called
         verify(mockPresentation, never()).nextSlide();
         verify(mockPresentation, never()).previousSlide();
     }
@@ -100,30 +96,22 @@ public class KeyControllerTest {
         verify(mockPresentation, never()).previousSlide();
     }
     
-    // Custom SecurityManager to prevent System.exit from actually exiting
-    private static class NoExitSecurityManager extends SecurityManager {
-        @Override
-        public void checkPermission(java.security.Permission perm) {
-            // Allow everything except exit
+    // Test-specific subclass that overrides the exit method
+    private static class TestableKeyController extends KeyController {
+        private boolean exitCalled = false;
+        
+        public TestableKeyController(Presentation presentation) {
+            super(presentation);
         }
         
         @Override
-        public void checkExit(int status) {
-            throw new ExitException(status);
-        }
-    }
-    
-    // Custom exception for System.exit testing
-    private static class ExitException extends SecurityException {
-        private final int status;
-        
-        public ExitException(int status) {
-            super("System.exit(" + status + ") was called");
-            this.status = status;
+        protected void exit() {
+            exitCalled = true;
+            // Don't call System.exit in tests
         }
         
-        public int getStatus() {
-            return status;
+        public boolean wasExitCalled() {
+            return exitCalled;
         }
     }
 }

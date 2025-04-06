@@ -12,6 +12,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 import jabberpoint.model.Presentation;
+import jabberpoint.util.DemoLoader;
 import jabberpoint.util.HTMLExporter;
 import jabberpoint.util.PresentationExporter;
 import jabberpoint.util.TextExporter;
@@ -49,6 +50,23 @@ public class MenuController extends MenuBar implements ActionListener {
     private static final String LOADERR = "Load Error";
     private static final String SAVEERR = "Save Error";
     private static final String EXPORTERR = "Export Error";
+    
+    private static final String NAVIGATION_HELP_TEXT = 
+            "Navigation Controls:\n\n" +
+            "Next Slide:\n" +
+            "- Right Arrow Key\n" +
+            "- Down Arrow Key\n" +
+            "- Page Down Key\n" +
+            "- Enter Key\n" +
+            "- '+' Key\n\n" +
+            "Previous Slide:\n" +
+            "- Left Arrow Key\n" +
+            "- Up Arrow Key\n" +
+            "- Page Up Key\n" +
+            "- '-' Key\n\n" +
+            "Exit Presentation:\n" +
+            "- 'Q' Key\n\n" +
+            "You can also use the View menu to navigate between slides.";
 
     public MenuController(Frame frame, Presentation pres) {
         parent = frame;
@@ -91,6 +109,7 @@ public class MenuController extends MenuBar implements ActionListener {
         
         add(editMenu);
         
+        // View menu with navigation hint
         Menu viewMenu = new Menu(VIEW);
         viewMenu.add(menuItem = mkMenuItem(NEXT));
         menuItem.addActionListener(this);
@@ -106,6 +125,9 @@ public class MenuController extends MenuBar implements ActionListener {
         Menu helpMenu = new Menu(HELP);
         helpMenu.add(menuItem = mkMenuItem(ABOUT));
         menuItem.addActionListener(this);
+        
+        helpMenu.add(menuItem = new MenuItem("Navigation Help"));
+        menuItem.addActionListener(e -> showNavigationHelp());
         
         setHelpMenu(helpMenu);
     }
@@ -159,20 +181,37 @@ public class MenuController extends MenuBar implements ActionListener {
     }
     
     private void openPresentation() {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setCurrentDirectory(new java.io.File("."));
-        int returnVal = fileChooser.showOpenDialog(parent);
+        Object[] options = {"Open File", "Load Demo", "Cancel"};
+        int choice = JOptionPane.showOptionDialog(parent,
+                "Choose a presentation source:",
+                "Open Presentation",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options[0]);
         
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            try {
-                XMLLoader loader = new XMLLoader();
-                presentation.clear();
-                loader.loadPresentation(presentation, fileChooser.getSelectedFile().getPath());
-                presentation.setSlideNumber(0);
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(parent, IOEX + ex, LOADERR, JOptionPane.ERROR_MESSAGE);
+        if (choice == 0) {
+            // Open File option selected
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setCurrentDirectory(new java.io.File("."));
+            int returnVal = fileChooser.showOpenDialog(parent);
+            
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                try {
+                    XMLLoader loader = new XMLLoader();
+                    presentation.clear();
+                    loader.loadPresentation(presentation, fileChooser.getSelectedFile().getPath());
+                    presentation.setSlideNumber(0);
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(parent, IOEX + ex, LOADERR, JOptionPane.ERROR_MESSAGE);
+                }
             }
+        } else if (choice == 1) {
+            // Load Demo option selected
+            loadDemoPresentation();
         }
+        // If Cancel (choice == 2) or dialog closed, do nothing
     }
     
     private void savePresentation() {
@@ -229,5 +268,25 @@ public class MenuController extends MenuBar implements ActionListener {
     
     private void openSlideEditor() {
         new SlideEditorFrame(parent, presentation);
+    }
+    
+    private void loadDemoPresentation() {
+        try {
+            DemoLoader demoLoader = new DemoLoader();
+            presentation.clear();
+            demoLoader.loadPresentation(presentation, "");
+            presentation.setSlideNumber(0);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(parent, IOEX + ex, LOADERR, JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private void showNavigationHelp() {
+        JOptionPane.showMessageDialog(
+                parent,
+                NAVIGATION_HELP_TEXT,
+                "Navigation Help",
+                JOptionPane.INFORMATION_MESSAGE
+        );
     }
 }

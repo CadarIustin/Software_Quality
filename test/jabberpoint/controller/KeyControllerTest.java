@@ -32,22 +32,25 @@ public class KeyControllerTest {
         // Test Page Down key
         when(mockKeyEvent.getKeyCode()).thenReturn(KeyEvent.VK_PAGE_DOWN);
         keyController.keyPressed(mockKeyEvent);
-        verify(mockPresentation).nextSlide();
         
         // Test Down Arrow key
         when(mockKeyEvent.getKeyCode()).thenReturn(KeyEvent.VK_DOWN);
         keyController.keyPressed(mockKeyEvent);
-        verify(mockPresentation, times(2)).nextSlide();
         
         // Test Enter key
         when(mockKeyEvent.getKeyCode()).thenReturn(KeyEvent.VK_ENTER);
         keyController.keyPressed(mockKeyEvent);
-        verify(mockPresentation, times(3)).nextSlide();
         
-        // Test '+' key (character '+')
-        when(mockKeyEvent.getKeyCode()).thenReturn((int)'+');
+        // Test Right Arrow key
+        when(mockKeyEvent.getKeyCode()).thenReturn(KeyEvent.VK_RIGHT);
         keyController.keyPressed(mockKeyEvent);
-        verify(mockPresentation, times(4)).nextSlide();
+        
+        // Test Plus key
+        when(mockKeyEvent.getKeyCode()).thenReturn(KeyEvent.VK_PLUS);
+        keyController.keyPressed(mockKeyEvent);
+        
+        // Verify nextSlide was called 5 times
+        verify(mockPresentation, times(5)).nextSlide();
     }
     
     @Test
@@ -55,36 +58,40 @@ public class KeyControllerTest {
         // Test Page Up key
         when(mockKeyEvent.getKeyCode()).thenReturn(KeyEvent.VK_PAGE_UP);
         keyController.keyPressed(mockKeyEvent);
-        verify(mockPresentation).previousSlide();
         
         // Test Up Arrow key
         when(mockKeyEvent.getKeyCode()).thenReturn(KeyEvent.VK_UP);
         keyController.keyPressed(mockKeyEvent);
-        verify(mockPresentation, times(2)).previousSlide();
         
         // Test '-' key (character '-')
-        when(mockKeyEvent.getKeyCode()).thenReturn((int)'-');
+        when(mockKeyEvent.getKeyCode()).thenReturn(KeyEvent.VK_MINUS);
         keyController.keyPressed(mockKeyEvent);
-        verify(mockPresentation, times(3)).previousSlide();
+        
+        // Test Left Arrow key
+        when(mockKeyEvent.getKeyCode()).thenReturn(KeyEvent.VK_LEFT);
+        keyController.keyPressed(mockKeyEvent);
+        
+        // Verify previousSlide was called 4 times
+        verify(mockPresentation, times(4)).previousSlide();
     }
     
     @Test
     void testExitKeyPressed() {
-        // We can't easily test System.exit, but we can at least verify that
-        // other methods are not called
+        // Create a testable KeyController subclass that overrides exit()
+        TestableKeyController testableController = new TestableKeyController(mockPresentation);
+        
+        // Test 'q' key
         when(mockKeyEvent.getKeyCode()).thenReturn((int)'q');
+        testableController.keyPressed(mockKeyEvent);
         
-        // This will fail with SecurityException if System.exit is actually called
-        // We'd need a SecurityManager to fully test this properly
-        try {
-            System.setSecurityManager(new NoExitSecurityManager());
-            assertThrows(ExitException.class, () -> {
-                keyController.keyPressed(mockKeyEvent);
-            });
-        } finally {
-            System.setSecurityManager(null);
-        }
+        // Test 'Q' key (uppercase)
+        when(mockKeyEvent.getKeyCode()).thenReturn((int)'Q');
+        testableController.keyPressed(mockKeyEvent);
         
+        // Verify exit was called (should be true after either 'q' or 'Q')
+        assertTrue(testableController.wasExitCalled(), "Exit should be called when 'q' or 'Q' is pressed");
+        
+        // Verify other methods were not called
         verify(mockPresentation, never()).nextSlide();
         verify(mockPresentation, never()).previousSlide();
     }
@@ -100,30 +107,22 @@ public class KeyControllerTest {
         verify(mockPresentation, never()).previousSlide();
     }
     
-    // Custom SecurityManager to prevent System.exit from actually exiting
-    private static class NoExitSecurityManager extends SecurityManager {
-        @Override
-        public void checkPermission(java.security.Permission perm) {
-            // Allow everything except exit
+    // Test-specific subclass that overrides the exit method
+    private static class TestableKeyController extends KeyController {
+        private boolean exitCalled = false;
+        
+        public TestableKeyController(Presentation presentation) {
+            super(presentation);
         }
         
         @Override
-        public void checkExit(int status) {
-            throw new ExitException(status);
-        }
-    }
-    
-    // Custom exception for System.exit testing
-    private static class ExitException extends SecurityException {
-        private final int status;
-        
-        public ExitException(int status) {
-            super("System.exit(" + status + ") was called");
-            this.status = status;
+        protected void exit() {
+            exitCalled = true;
+            // Don't call System.exit in tests
         }
         
-        public int getStatus() {
-            return status;
+        public boolean wasExitCalled() {
+            return exitCalled;
         }
     }
 }

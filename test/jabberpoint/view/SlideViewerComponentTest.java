@@ -5,14 +5,14 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.Font;
+import java.awt.Color;
 
 import jabberpoint.model.Presentation;
 import jabberpoint.model.Slide;
 import jabberpoint.model.TextItem;
-import jabberpoint.util.DefaultTheme;
-import jabberpoint.util.ThemeStrategy;
 
 /**
  * Unit test for the SlideViewerComponent class
@@ -21,12 +21,10 @@ public class SlideViewerComponentTest {
     
     private SlideViewerComponent slideViewer;
     private Presentation presentation;
-    private ThemeStrategy theme;
     
     @BeforeEach
     void setUp() {
         presentation = new Presentation();
-        theme = new DefaultTheme();
         
         // Create test slide
         Slide slide = new Slide();
@@ -38,13 +36,13 @@ public class SlideViewerComponentTest {
         presentation.setSlideNumber(0);
         
         // Create the component
-        slideViewer = new SlideViewerComponent(presentation, theme);
+        slideViewer = new SlideViewerComponent(presentation);
     }
     
     @Test
     void testInitialization() {
         assertNotNull(slideViewer);
-        assertEquals(presentation, slideViewer.getPresentation());
+        assertNotNull(slideViewer.getSlide());
     }
     
     @Test
@@ -65,6 +63,9 @@ public class SlideViewerComponentTest {
         assertDoesNotThrow(() -> {
             slideViewer.update(presentation, newSlide);
         });
+        
+        // Verify the slide was updated
+        assertEquals(newSlide, slideViewer.getSlide());
     }
     
     @Test
@@ -79,19 +80,23 @@ public class SlideViewerComponentTest {
     
     @Test
     void testPaintComponent() {
-        // Create mock Graphics
-        Graphics mockGraphics = mock(Graphics.class);
+        // Create a Graphics2D mock instead of Graphics
+        Graphics2D mockGraphics = mock(Graphics2D.class);
         
         // Mock the getClipBounds method to return a rectangle
         when(mockGraphics.getClipBounds()).thenReturn(new Rectangle(0, 0, 800, 600));
+        
+        // Mock font and color methods to prevent NPE
+        when(mockGraphics.getFont()).thenReturn(new Font("SansSerif", Font.PLAIN, 12));
+        when(mockGraphics.getColor()).thenReturn(Color.BLACK);
         
         // Call paintComponent
         assertDoesNotThrow(() -> {
             slideViewer.paintComponent(mockGraphics);
         });
         
-        // It's difficult to verify what was drawn without making fields accessible
-        // but we can at least verify the method doesn't crash
+        // Verify that at least some drawing methods were called
+        verify(mockGraphics, atLeastOnce()).drawString(anyString(), anyInt(), anyInt());
     }
     
     @Test
@@ -100,19 +105,5 @@ public class SlideViewerComponentTest {
         assertDoesNotThrow(() -> {
             slideViewer.update(presentation, null);
         });
-    }
-    
-    @Test
-    void testChangeTheme() {
-        // Create a different theme
-        ThemeStrategy darkTheme = new jabberpoint.util.DarkTheme();
-        
-        // Change theme
-        assertDoesNotThrow(() -> {
-            slideViewer.setTheme(darkTheme);
-        });
-        
-        // We can't easily verify the theme was changed without making fields accessible,
-        // but we can verify the method doesn't crash
     }
 }

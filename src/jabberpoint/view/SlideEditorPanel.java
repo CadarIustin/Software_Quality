@@ -13,7 +13,6 @@ import javax.swing.border.EmptyBorder;
 
 import jabberpoint.model.BitmapItem;
 import jabberpoint.model.Presentation;
-import jabberpoint.model.ShapeItem;
 import jabberpoint.model.Slide;
 import jabberpoint.model.TextItem;
 
@@ -42,7 +41,7 @@ public class SlideEditorPanel extends JPanel {
         JPanel itemPanel = new JPanel(new GridLayout(4, 2, 5, 5));
         
         itemPanel.add(new JLabel("Item Type:"));
-        String[] itemTypes = {"Text", "Image", "Rectangle", "Circle", "Line", "Triangle"};
+        String[] itemTypes = {"Text", "Image"};
         itemTypeCombo = new JComboBox<>(itemTypes);
         itemPanel.add(itemTypeCombo);
         
@@ -115,14 +114,16 @@ public class SlideEditorPanel extends JPanel {
     private void addItemToCurrentSlide() {
         Slide currentSlide = presentation.getCurrentSlide();
         if (currentSlide == null) {
-            return;
+            // Create a new slide if one doesn't exist
+            createNewSlide();
+            currentSlide = presentation.getCurrentSlide();
         }
         
-        int level = (Integer) levelCombo.getSelectedItem();
+        String type = (String) itemTypeCombo.getSelectedItem();
         String content = itemContentField.getText();
-        String itemType = (String) itemTypeCombo.getSelectedItem();
+        int level = (Integer) levelCombo.getSelectedItem();
         
-        switch (itemType) {
+        switch (type) {
             case "Text":
                 currentSlide.append(new TextItem(level, content));
                 break;
@@ -130,31 +131,21 @@ public class SlideEditorPanel extends JPanel {
             case "Image":
                 currentSlide.append(new BitmapItem(level, content));
                 break;
-                
-            case "Rectangle":
-                currentSlide.append(new ShapeItem(level, ShapeItem.ShapeType.RECTANGLE, 150, 100));
-                break;
-                
-            case "Circle":
-                currentSlide.append(new ShapeItem(level, ShapeItem.ShapeType.CIRCLE, 120, 120));
-                break;
-                
-            case "Line":
-                currentSlide.append(new ShapeItem(level, ShapeItem.ShapeType.LINE, 200, 80));
-                break;
-                
-            case "Triangle":
-                currentSlide.append(new ShapeItem(level, ShapeItem.ShapeType.TRIANGLE, 150, 120));
-                break;
         }
         
         presentation.notifyObservers();
+        
+        // Reset content field
+        itemContentField.setText("");
     }
     
     private void createNewSlide() {
         Slide newSlide = new Slide();
-        newSlide.setTitle(titleField.getText().isEmpty() ? "New Slide" : titleField.getText());
+        newSlide.setTitle("New Slide");
         presentation.addSlide(newSlide);
         presentation.setSlideNumber(presentation.getSize() - 1);
+        
+        // Update editor with new slide
+        updateEditorFromCurrentSlide();
     }
 }

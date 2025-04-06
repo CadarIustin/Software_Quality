@@ -5,7 +5,8 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.awt.Graphics;
+
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
 import jabberpoint.model.Presentation;
@@ -78,8 +79,8 @@ public class SlideViewerComponentTest {
     
     @Test
     void testPaintComponent() {
-        // Create mock Graphics
-        Graphics mockGraphics = mock(Graphics.class);
+        // Create a Graphics2D mock instead of Graphics
+        Graphics2D mockGraphics = mock(Graphics2D.class);
         
         // Mock the getClipBounds method to return a rectangle
         when(mockGraphics.getClipBounds()).thenReturn(new Rectangle(0, 0, 800, 600));

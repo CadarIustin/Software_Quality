@@ -3,10 +3,13 @@ package jabberpoint.model;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.ImageObserver;
+import java.awt.Font;
 
 /**
  * Unit test for the BitmapItem class
@@ -19,7 +22,7 @@ public class BitmapItemTest {
     @BeforeEach
     public void setUp() {
         // Create a style for testing
-        style = new Style(1, 12, java.awt.Color.BLACK, "Arial", 10, 0);
+        style = new Style(10, 20, java.awt.Color.BLACK, "SansSerif", 12, Font.PLAIN);
         
         // Create a BitmapItem with the JabberPoint.gif image
         bitmapItem = new BitmapItem(1, "JabberPoint.gif");
@@ -46,8 +49,8 @@ public class BitmapItemTest {
     @Test
     public void testGetBoundingBox() {
         // Create mock objects
-        Graphics mockGraphics = null; // Not actually used in the method
-        ImageObserver mockObserver = null; // Not actually used in the method
+        Graphics mockGraphics = mock(Graphics.class);
+        ImageObserver mockObserver = mock(ImageObserver.class);
         
         // Get the bounding box
         Rectangle box = bitmapItem.getBoundingBox(mockGraphics, mockObserver, 1.0f, style);
@@ -60,12 +63,11 @@ public class BitmapItemTest {
     
     @Test
     public void testDraw() {
-        // This is a visual test that's hard to verify without mocking
-        // We'll just ensure it doesn't throw exceptions
-        Graphics mockGraphics = null; // We're not actually using this
-        ImageObserver mockObserver = null; // We're not actually using this
+        // Create proper mocks for the test
+        Graphics2D mockGraphics = mock(Graphics2D.class);
+        ImageObserver mockObserver = mock(ImageObserver.class);
         
-        // Should not throw exception even with null graphics
+        // Should not throw exception with mocked graphics
         assertDoesNotThrow(() -> bitmapItem.draw(10, 10, 1.0f, mockGraphics, style, mockObserver));
     }
     
@@ -76,8 +78,8 @@ public class BitmapItemTest {
         
         // The item should be created but the bufferedImage should be null
         // This is tested indirectly by making sure getBoundingBox and draw don't throw exceptions
-        Graphics mockGraphics = null;
-        ImageObserver mockObserver = null;
+        Graphics2D mockGraphics = mock(Graphics2D.class);
+        ImageObserver mockObserver = mock(ImageObserver.class);
         
         // Should not throw exception for invalid image
         assertDoesNotThrow(() -> invalidItem.getBoundingBox(mockGraphics, mockObserver, 1.0f, style));

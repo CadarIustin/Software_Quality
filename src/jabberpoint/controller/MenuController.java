@@ -12,12 +12,9 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 import jabberpoint.model.Presentation;
-import jabberpoint.util.DefaultTheme;
-import jabberpoint.util.DarkTheme;
 import jabberpoint.util.HTMLExporter;
 import jabberpoint.util.PresentationExporter;
 import jabberpoint.util.TextExporter;
-import jabberpoint.util.ThemeStrategy;
 import jabberpoint.util.XMLLoader;
 import jabberpoint.util.XMLSaver;
 import jabberpoint.view.AboutBox;
@@ -45,10 +42,6 @@ public class MenuController extends MenuBar implements ActionListener {
     private static final String EDIT = "Edit";
     private static final String EDIT_PRESENTATION = "Edit Presentation";
     private static final String VIEW = "View";
-    private static final String THEMES = "Themes";
-    private static final String DEFAULT_THEME = "Default Theme";
-    private static final String DARK_THEME = "Dark Theme";
-    private static final String CYCLE_TRANSITION = "Cycle Transition";
     
     protected static final String DEFAULT_SAVEFILE = "presentation.xml";
     
@@ -108,21 +101,7 @@ public class MenuController extends MenuBar implements ActionListener {
         viewMenu.add(menuItem = mkMenuItem(GOTO));
         menuItem.addActionListener(this);
         
-        viewMenu.add(menuItem = new MenuItem(CYCLE_TRANSITION));
-        menuItem.addActionListener(this);
-        
         add(viewMenu);
-        
-        // Add Themes menu
-        Menu themesMenu = new Menu(THEMES);
-        
-        themesMenu.add(menuItem = new MenuItem(DEFAULT_THEME));
-        menuItem.addActionListener(this);
-        
-        themesMenu.add(menuItem = new MenuItem(DARK_THEME));
-        menuItem.addActionListener(this);
-        
-        add(themesMenu);
         
         Menu helpMenu = new Menu(HELP);
         helpMenu.add(menuItem = mkMenuItem(ABOUT));
@@ -169,19 +148,6 @@ public class MenuController extends MenuBar implements ActionListener {
             case EDIT_PRESENTATION:
                 openSlideEditor();
                 break;
-            case CYCLE_TRANSITION:
-                cycleTransition();
-                break;
-            case DEFAULT_THEME:
-                ThemeStrategy theme = new DefaultTheme();
-                theme.applyTheme();
-                presentation.notifyObservers();
-                break;
-            case DARK_THEME:
-                theme = new DarkTheme();
-                theme.applyTheme();
-                presentation.notifyObservers();
-                break;
             default:
                 // Unknown command - do nothing
                 break;
@@ -210,6 +176,10 @@ public class MenuController extends MenuBar implements ActionListener {
     }
     
     private void savePresentation() {
+        if (presentation.getTitle() == null || presentation.getTitle().isEmpty()) {
+            presentation.setTitle("Saved Presentation");
+        }
+        
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setCurrentDirectory(new java.io.File("."));
         int returnVal = fileChooser.showSaveDialog(parent);
@@ -224,10 +194,15 @@ public class MenuController extends MenuBar implements ActionListener {
         }
     }
     
+    private void newPresentation() {
+        presentation.clear();
+        presentation.setTitle("New Presentation");
+        presentation.setSlideNumber(-1);
+    }
+    
     private void exportPresentation(PresentationExporter exporter) {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setCurrentDirectory(new java.io.File("."));
-        fileChooser.setDialogTitle("Export as " + exporter.getDescription());
         int returnVal = fileChooser.showSaveDialog(parent);
         
         if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -239,38 +214,20 @@ public class MenuController extends MenuBar implements ActionListener {
         }
     }
     
-    private void newPresentation() {
-        presentation.clear();
-        presentation.setTitle("New Presentation");
-        presentation.setSlideNumber(-1);
-    }
-    
     private void gotoSlide() {
-        String pageNumberStr = JOptionPane.showInputDialog((Object)PAGENR);
-        if (pageNumberStr != null && !pageNumberStr.isEmpty()) {
-            try {
-                int pageNumber = Integer.parseInt(pageNumberStr);
-                presentation.setSlideNumber(pageNumber - 1);
-            } catch (NumberFormatException ex) {
-                // Invalid number format, do nothing
-            }
+        String pageNumberStr = JOptionPane.showInputDialog(PAGENR);
+        int pageNumber;
+        try {
+            pageNumber = Integer.parseInt(pageNumberStr);
+            presentation.setSlideNumber(pageNumber - 1);
+        } catch (NumberFormatException nfe) {
+            // Do nothing if invalid number format
+        } catch (IllegalArgumentException iae) {
+            // Do nothing if slide number out of range
         }
     }
     
     private void openSlideEditor() {
-        new SlideEditorFrame(presentation);
-    }
-    
-    private void cycleTransition() {
-        // Find the SlideViewerComponent to cycle its transition
-        if (parent instanceof jabberpoint.view.SlideViewerFrame) {
-            jabberpoint.view.SlideViewerFrame frame = (jabberpoint.view.SlideViewerFrame) parent;
-            frame.getSlideViewerComponent().cycleTransitionType();
-            String transitionName = frame.getSlideViewerComponent().getCurrentTransitionName();
-            JOptionPane.showMessageDialog(parent, 
-                "Transition changed to: " + transitionName, 
-                "Transition Type", 
-                JOptionPane.INFORMATION_MESSAGE);
-        }
+        new SlideEditorFrame(parent, presentation);
     }
 }

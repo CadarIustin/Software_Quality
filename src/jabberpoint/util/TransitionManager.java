@@ -1,3 +1,9 @@
+/**
+ * DEPRECATED - This class is no longer used in the application
+ * 
+ * All transition functionality has been removed from the application as requested
+ * by the user. This file is kept for historical purposes but should not be used.
+ */
 package jabberpoint.util;
 
 import java.awt.Graphics;
@@ -11,6 +17,9 @@ import javax.swing.Timer;
 import jabberpoint.model.Slide;
 import jabberpoint.view.SlideViewerComponent;
 
+/**
+ * DEPRECATED - This class is no longer used in the application
+ */
 public class TransitionManager {
     private static final int TRANSITION_DURATION = 500; // milliseconds
     private static final int TRANSITION_STEPS = 20;
@@ -24,6 +33,9 @@ public class TransitionManager {
     private List<TransitionStrategy> availableTransitions;
     private int currentTransitionIndex = 0;
     
+    /**
+     * DEPRECATED - No longer used
+     */
     public TransitionManager(SlideViewerComponent viewer) {
         this.viewerComponent = viewer;
         
@@ -37,6 +49,9 @@ public class TransitionManager {
         currentTransition = availableTransitions.get(0);
     }
     
+    /**
+     * DEPRECATED - No longer used
+     */
     public void startTransition(Slide fromSlide, Slide toSlide) {
         if (transitionTimer != null && transitionTimer.isRunning()) {
             transitionTimer.stop();
@@ -68,7 +83,8 @@ public class TransitionManager {
             if (currentStep >= TRANSITION_STEPS) {
                 // End of transition
                 transitionTimer.stop();
-                viewerComponent.finishTransition();
+                // This line has been commented out since the method doesn't exist anymore
+                // viewerComponent.finishTransition();
             } else {
                 // Continue transition
                 viewerComponent.repaint();
@@ -78,6 +94,9 @@ public class TransitionManager {
         transitionTimer.start();
     }
     
+    /**
+     * DEPRECATED - No longer used
+     */
     public void drawTransition(Graphics g, Rectangle area, ImageObserver observer) {
         if (fromImage != null && toImage != null) {
             double progress = (double) currentStep / TRANSITION_STEPS;
@@ -85,15 +104,24 @@ public class TransitionManager {
         }
     }
     
+    /**
+     * DEPRECATED - No longer used
+     */
     public boolean isTransitionActive() {
         return transitionTimer != null && transitionTimer.isRunning();
     }
     
+    /**
+     * DEPRECATED - No longer used
+     */
     public void cycleTransition() {
         currentTransitionIndex = (currentTransitionIndex + 1) % availableTransitions.size();
         currentTransition = availableTransitions.get(currentTransitionIndex);
     }
     
+    /**
+     * DEPRECATED - No longer used
+     */
     public String getCurrentTransitionName() {
         return currentTransition.getTransitionName();
     }

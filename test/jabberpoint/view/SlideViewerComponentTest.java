@@ -11,8 +11,6 @@ import java.awt.Rectangle;
 import jabberpoint.model.Presentation;
 import jabberpoint.model.Slide;
 import jabberpoint.model.TextItem;
-import jabberpoint.util.DefaultTheme;
-import jabberpoint.util.ThemeStrategy;
 
 /**
  * Unit test for the SlideViewerComponent class
@@ -21,12 +19,10 @@ public class SlideViewerComponentTest {
     
     private SlideViewerComponent slideViewer;
     private Presentation presentation;
-    private ThemeStrategy theme;
     
     @BeforeEach
     void setUp() {
         presentation = new Presentation();
-        theme = new DefaultTheme();
         
         // Create test slide
         Slide slide = new Slide();
@@ -38,13 +34,13 @@ public class SlideViewerComponentTest {
         presentation.setSlideNumber(0);
         
         // Create the component
-        slideViewer = new SlideViewerComponent(presentation, theme);
+        slideViewer = new SlideViewerComponent(presentation);
     }
     
     @Test
     void testInitialization() {
         assertNotNull(slideViewer);
-        assertEquals(presentation, slideViewer.getPresentation());
+        assertNotNull(slideViewer.getSlide());
     }
     
     @Test
@@ -65,6 +61,9 @@ public class SlideViewerComponentTest {
         assertDoesNotThrow(() -> {
             slideViewer.update(presentation, newSlide);
         });
+        
+        // Verify the slide was updated
+        assertEquals(newSlide, slideViewer.getSlide());
     }
     
     @Test
@@ -100,19 +99,5 @@ public class SlideViewerComponentTest {
         assertDoesNotThrow(() -> {
             slideViewer.update(presentation, null);
         });
-    }
-    
-    @Test
-    void testChangeTheme() {
-        // Create a different theme
-        ThemeStrategy darkTheme = new jabberpoint.util.DarkTheme();
-        
-        // Change theme
-        assertDoesNotThrow(() -> {
-            slideViewer.setTheme(darkTheme);
-        });
-        
-        // We can't easily verify the theme was changed without making fields accessible,
-        // but we can verify the method doesn't crash
     }
 }

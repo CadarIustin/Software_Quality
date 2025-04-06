@@ -52,15 +52,14 @@ jobs:
     - name: Run tests with JaCoCo coverage
       id: run_tests
       run: mvn test jacoco:report
-      continue-on-error: true
     - name: Check test status
       id: check_tests
       run: |
-        if [ "${{ steps.run_tests.outcome }}" == "success" ]; then
-          echo "All tests passed!"
+        if [ -f "target/site/jacoco/index.html" ]; then
+          echo "Coverage report generated successfully"
           echo "tests_passed=true" >> $GITHUB_OUTPUT
         else
-          echo "Tests failed!"
+          echo "Tests failed or coverage report was not generated"
           echo "tests_passed=false" >> $GITHUB_OUTPUT
           exit 1
         fi

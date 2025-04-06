@@ -1,5 +1,6 @@
 package jabberpoint.model;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -11,6 +12,12 @@ import java.awt.Font;
  * by targeting conditional logic in the Style class.
  */
 public class StyleBranchCoverageTest {
+    
+    @BeforeEach
+    void setUp() {
+        // Initialize styles before tests
+        Style.createStyles();
+    }
     
     @Test
     void testStyleConstructorBranches() {
@@ -34,7 +41,7 @@ public class StyleBranchCoverageTest {
     void testGetStyleBranches() {
         // We can't clear styles directly, so let's work with existing styles
         
-        // Get styles that should already exist after previous tests
+        // Get styles that should already exist after initialization
         Style style0 = Style.getStyle(0);
         assertNotNull(style0);
         
@@ -64,5 +71,18 @@ public class StyleBranchCoverageTest {
         
         // Font size should be proportional to scale
         assertEquals(normalFont.getSize() * 2, largerFont.getSize());
+    }
+    
+    @Test
+    void testFontNameEnum() {
+        // Test the FontName enum
+        assertEquals("Serif", Style.FontName.SERIF.getName());
+        assertEquals("SansSerif", Style.FontName.SANS_SERIF.getName());
+        assertEquals("Monospaced", Style.FontName.MONOSPACED.getName());
+        
+        // Test constructor used in enum
+        for (Style.FontName fontName : Style.FontName.values()) {
+            assertNotNull(fontName.getName());
+        }
     }
 }

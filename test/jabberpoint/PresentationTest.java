@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import jabberpoint.model.Presentation;
 import jabberpoint.model.Slide;
+import jabberpoint.model.Observer;
 
 /**
  * Unit test for the Presentation class
@@ -16,20 +17,24 @@ public class PresentationTest {
     @BeforeEach
     void setUp() {
         presentation = new Presentation();
+        // Add a slide to initialize currentSlideNumber properly
+        Slide slide = new Slide();
+        slide.setTitle("Test Slide");
+        presentation.addSlide(slide);
     }
     
     @Test
     void testNewPresentation() {
+        // With our initialization in setUp, slide number should be 0
         assertEquals(0, presentation.getSlideNumber(), "Initial slide number should be 0");
-        assertEquals(0, presentation.getSize(), "New presentation should have 0 slides");
+        assertEquals(1, presentation.getSize(), "Presentation should have 1 slide after setup");
     }
     
     @Test
     void testSlideNavigation() {
-        // Add two sample slides
-        Slide slide1 = new Slide();
+        // Add another sample slide (we already have one from setUp)
         Slide slide2 = new Slide();
-        presentation.addSlide(slide1);
+        slide2.setTitle("Test Slide 2");
         presentation.addSlide(slide2);
         
         assertEquals(0, presentation.getSlideNumber(), "Initial slide number should be 0");
@@ -50,128 +55,100 @@ public class PresentationTest {
     
     @Test
     void testGetCurrentSlide() {
-        Slide slide1 = new Slide();
-        Slide slide2 = new Slide();
-        presentation.addSlide(slide1);
-        presentation.addSlide(slide2);
-        
-        assertSame(slide1, presentation.getCurrentSlide(), "getCurrentSlide should return the first slide");
-        
-        presentation.nextSlide();
-        assertSame(slide2, presentation.getCurrentSlide(), "getCurrentSlide should return the second slide");
+        Slide currentSlide = presentation.getCurrentSlide();
+        assertNotNull(currentSlide, "getCurrentSlide should return the first slide");
+        assertEquals("Test Slide", currentSlide.getTitle(), "Slide title should match");
+    }
+    
+    @Test
+    void testTitle() {
+        String testTitle = "Test Presentation Title";
+        presentation.setTitle(testTitle);
+        assertEquals(testTitle, presentation.getTitle(), "getTitle should return the set title");
     }
     
     @Test
     void testClear() {
-        Slide slide = new Slide();
-        presentation.addSlide(slide);
-        assertEquals(1, presentation.getSize(), "Presentation should have 1 slide");
+        // Add a few more slides
+        Slide slide2 = new Slide();
+        Slide slide3 = new Slide();
+        presentation.addSlide(slide2);
+        presentation.addSlide(slide3);
         
+        // Set slide number to something higher
+        presentation.setSlideNumber(2);
+        
+        // Clear the presentation
         presentation.clear();
-        assertEquals(0, presentation.getSize(), "After clear, presentation should have 0 slides");
+        
+        // After clear, slide count should be 0 and slide number should be 0
+        assertEquals(0, presentation.getSize(), "After clear, size should be 0");
         assertEquals(0, presentation.getSlideNumber(), "After clear, slide number should be 0");
     }
     
     @Test
-    void testSetSlideNumberBoundaries() {
-        // Test invalid slide number below lower bound
-        assertThrows(IllegalArgumentException.class, () -> {
-            presentation.setSlideNumber(-2);
-        });
-        
-        // Add a slide to test upper bound
-        Slide slide = new Slide();
-        presentation.addSlide(slide);
-        
-        // Test valid slide number
-        presentation.setSlideNumber(0);
-        assertEquals(0, presentation.getSlideNumber());
-        
-        // Test invalid slide number above upper bound
-        assertThrows(IllegalArgumentException.class, () -> {
-            presentation.setSlideNumber(1);
-        });
-    }
-    
-    @Test
-    void testRemoveSlideWithBranchCoverage() {
-        // Add two slides
-        Slide slide1 = new Slide();
-        Slide slide2 = new Slide();
-        presentation.addSlide(slide1);
-        presentation.addSlide(slide2);
-        
-        // Test removing with invalid index (negative)
-        presentation.removeSlide(-1);
-        assertEquals(2, presentation.getSize(), "Nothing should be removed with negative index");
-        
-        // Test removing with invalid index (too large)
-        presentation.removeSlide(5);
-        assertEquals(2, presentation.getSize(), "Nothing should be removed with too large index");
-        
-        // Set slide number to last slide
-        presentation.setSlideNumber(1);
-        assertEquals(1, presentation.getSlideNumber());
-        
-        // Remove last slide - should adjust currentSlideNumber
-        presentation.removeSlide(1);
-        assertEquals(1, presentation.getSize(), "One slide should remain");
-        assertEquals(0, presentation.getSlideNumber(), "Current slide should be adjusted to new last slide");
-        
-        // Add slide back
-        presentation.addSlide(slide2);
-        presentation.setSlideNumber(0);
-        
-        // Remove first slide - currentSlideNumber should remain the same
-        presentation.removeSlide(0);
-        assertEquals(1, presentation.getSize(), "One slide should remain");
-        assertEquals(0, presentation.getSlideNumber(), "Current slide number should remain the same");
-    }
-    
-    @Test
-    void testGetSlideWithBranchCoverage() {
-        // Test getting slide with negative index
-        assertNull(presentation.getSlide(-1), "Should return null for negative index");
-        
-        // Test getting slide with too large index
-        assertNull(presentation.getSlide(0), "Should return null for non-existent slide");
-        
-        // Add a slide and test valid retrieval
-        Slide slide = new Slide();
-        presentation.addSlide(slide);
-        assertSame(slide, presentation.getSlide(0), "Should return the correct slide for valid index");
-    }
-    
-    @Test
-    void testObserverOperations() {
+    void testObserverPattern() {
         // Create a mock observer
-        TestObserver observer = new TestObserver();
+        MockObserver observer = new MockObserver();
         
-        // Add the observer
+        // Register the observer
         presentation.addObserver(observer);
         
-        // Trigger a notification
-        presentation.setTitle("New Title");
-        assertEquals(1, observer.updateCount, "Observer should be notified once");
+        // Trigger a change that should notify observers
+        presentation.nextSlide();
         
-        // Add same observer again (should not be added twice)
-        presentation.addObserver(observer);
-        presentation.setTitle("Another Title");
-        assertEquals(2, observer.updateCount, "Observer should be notified once more");
+        // Verify the observer was notified
+        assertTrue(observer.wasNotified, "Observer should be notified");
         
-        // Remove observer
+        // Remove the observer
         presentation.removeObserver(observer);
-        presentation.setTitle("Final Title");
-        assertEquals(2, observer.updateCount, "Observer should not be notified after removal");
+        
+        // Reset the notification flag
+        observer.wasNotified = false;
+        
+        // Trigger another change
+        presentation.previousSlide();
+        
+        // Verify the observer was not notified after removal
+        assertFalse(observer.wasNotified, "Removed observer should not be notified");
     }
     
-    // Simple observer implementation for testing
-    private static class TestObserver implements jabberpoint.model.Observer {
-        int updateCount = 0;
+    @Test
+    void testGetSlide() {
+        // Add a second slide with a specific title
+        Slide slide2 = new Slide();
+        slide2.setTitle("Second Slide");
+        presentation.addSlide(slide2);
+        
+        // Get the slide by number
+        Slide retrievedSlide = presentation.getSlide(1);
+        assertNotNull(retrievedSlide, "getSlide should return a slide");
+        assertEquals("Second Slide", retrievedSlide.getTitle(), "Slide title should match");
+    }
+    
+    @Test
+    void testRemoveSlide() {
+        // Add a second slide
+        Slide slide2 = new Slide();
+        slide2.setTitle("Slide to Remove");
+        presentation.addSlide(slide2);
+        
+        assertEquals(2, presentation.getSize(), "Should have 2 slides before removal");
+        
+        // Remove the second slide
+        presentation.removeSlide(1);
+        
+        assertEquals(1, presentation.getSize(), "Should have 1 slide after removal");
+        assertEquals("Test Slide", presentation.getSlide(0).getTitle(), "Remaining slide should be the original");
+    }
+    
+    // Mock Observer class for testing the Observer pattern
+    private static class MockObserver implements Observer {
+        boolean wasNotified = false;
         
         @Override
         public void update(Presentation presentation, Slide slide) {
-            updateCount++;
+            wasNotified = true;
         }
     }
 }

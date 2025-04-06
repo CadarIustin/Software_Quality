@@ -65,25 +65,22 @@ jobs:
             echo "modified=false" >> $GITHUB_OUTPUT
           fi
       
-      - name: Create Pull Request with formatted code
+      - name: Suggest code formatting changes
         if: steps.git-check.outputs.modified == 'true'
-        uses: peter-evans/create-pull-request@v5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: 'style: Apply code formatting'
-          branch: format-code-${{ github.head_ref || github.ref_name }}
-          delete-branch: true
-          title: 'Format code for ${{ github.head_ref || github.ref_name }}'
-          body: |
-            This PR contains automatically formatted code based on project style guidelines.
-            
-            Changes made by the Spotless Maven plugin:
-            - Formatted Java files according to Google Java Format
-            - Removed unused imports
-            - Applied consistent code style
-          labels: automated-pr, code-formatting
-          base: ${{ github.head_ref || github.ref_name }}
-          draft: false
+        run: |
+          echo "### Code formatting suggestions" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The linter has detected code style issues. Here's a summary of changes that should be made:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "```diff" >> $GITHUB_STEP_SUMMARY
+          git diff --unified=1 >> $GITHUB_STEP_SUMMARY
+          echo "```" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "To apply these changes locally, run: `mvn spotless:apply`" >> $GITHUB_STEP_SUMMARY
+          
+          # Also output to the workflow log
+          echo "Code formatting issues detected. Please run 'mvn spotless:apply' locally to fix them."
+          git diff --unified=1
       
       - name: Generate Checkstyle Report
         if: success() || failure()

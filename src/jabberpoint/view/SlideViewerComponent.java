@@ -10,7 +10,7 @@ import javax.swing.JFrame;
 
 import jabberpoint.model.Presentation;
 import jabberpoint.model.Slide;
-import jabberpoint.model.Observer;
+import jabberpoint.model.PresentationObserver;
 import jabberpoint.util.TransitionManager;
 import jabberpoint.util.ThemeStrategy;
 
@@ -18,7 +18,7 @@ import jabberpoint.util.ThemeStrategy;
  * JabberPoint SlideViewerComponent
  * This class represents the presentation viewer component.
  */
-public class SlideViewerComponent extends JComponent implements Observer {
+public class SlideViewerComponent extends JComponent implements PresentationObserver {
     private static final long serialVersionUID = 227L;
     private static final int XPOS = 1100;
     private static final int YPOS = 20;

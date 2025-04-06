@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import jabberpoint.model.Presentation;
 import jabberpoint.model.Style;
+import jabberpoint.util.PresentationLoaderContext;
 import jabberpoint.util.XMLLoader;
 import jabberpoint.view.SlideViewerFrame;
 
@@ -31,8 +32,9 @@ public class JabberPoint {
         try {
             if (argv.length > 0) {
                 // Only load a file if one is specified on the command line
-                XMLLoader xmlLoader = new XMLLoader();
-                xmlLoader.loadPresentation(presentation, argv[0]);
+                // Use the Strategy pattern with XMLLoader
+                PresentationLoaderContext loaderContext = new PresentationLoaderContext(new XMLLoader());
+                loaderContext.loadPresentation(presentation, argv[0]);
                 presentation.setSlideNumber(0);
             } else {
                 // Show welcome message with navigation information

@@ -13,6 +13,7 @@ import javax.swing.JOptionPane;
 
 import jabberpoint.model.Presentation;
 import jabberpoint.util.DemoLoader;
+import jabberpoint.util.PresentationLoaderContext;
 import jabberpoint.util.XMLLoader;
 import jabberpoint.view.AboutBox;
 import jabberpoint.view.SlideEditorFrame;
@@ -22,6 +23,8 @@ public class MenuController extends MenuBar implements ActionListener {
     
     private Frame parent;
     private Presentation presentation;
+    private PresentationLoaderContext loaderContext; // Added for Strategy pattern
+    
     private static final String ABOUT = "About";
     private static final String FILE = "File";
     private static final String EXIT = "Exit";
@@ -60,6 +63,9 @@ public class MenuController extends MenuBar implements ActionListener {
     public MenuController(Frame frame, Presentation pres) {
         parent = frame;
         presentation = pres;
+        
+        // Initialize with default XMLLoader strategy
+        loaderContext = new PresentationLoaderContext(new XMLLoader());
         
         MenuItem menuItem;
         
@@ -157,16 +163,17 @@ public class MenuController extends MenuBar implements ActionListener {
                 options[0]);
         
         if (choice == 0) {
-            // Open File option selected
+            // Open File option selected - use XMLLoader strategy
+            loaderContext.setLoaderStrategy(new XMLLoader());
+            
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setCurrentDirectory(new java.io.File("."));
             int returnVal = fileChooser.showOpenDialog(parent);
             
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 try {
-                    XMLLoader xmlLoader = new XMLLoader();
                     presentation.clear();
-                    xmlLoader.loadPresentation(presentation, fileChooser.getSelectedFile().getPath());
+                    loaderContext.loadPresentation(presentation, fileChooser.getSelectedFile().getPath());
                     presentation.setSlideNumber(0);
                 } catch (IOException ex) {
                     JOptionPane.showMessageDialog(parent, IOEX + ex,
@@ -174,7 +181,7 @@ public class MenuController extends MenuBar implements ActionListener {
                 }
             }
         } else if (choice == 1) {
-            // Load Demo option selected
+            // Load Demo option selected - use DemoLoader strategy
             loadDemoPresentation();
         }
         // If Cancel was selected, do nothing
@@ -205,10 +212,12 @@ public class MenuController extends MenuBar implements ActionListener {
     }
     
     private void loadDemoPresentation() {
+        // Switch to DemoLoader strategy
+        loaderContext.setLoaderStrategy(new DemoLoader());
+        
         presentation.clear();
         try {
-            DemoLoader demoLoader = new DemoLoader();
-            demoLoader.loadPresentation(presentation, "");
+            loaderContext.loadPresentation(presentation, "");
             presentation.setSlideNumber(0);
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(parent, IOEX + ex,

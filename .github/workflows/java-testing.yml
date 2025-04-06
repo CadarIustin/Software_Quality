@@ -73,6 +73,15 @@ jobs:
       with:
         name: jacoco-report
         path: target/site/jacoco/
+    - name: Publish code coverage report
+      if: steps.check_tests.outputs.tests_passed == 'true'
+      uses: madrapps/jacoco-report@v1.7.1
+      with:
+        paths: ${{ github.workspace }}/target/site/jacoco/jacoco.xml
+        token: ${{ secrets.GITHUB_TOKEN }}
+        min-coverage-overall: 50
+        min-coverage-changed-files: 60
+        title: 'JaCoCo Code Coverage Report'
 
   promote-to-acceptance:
     needs: test

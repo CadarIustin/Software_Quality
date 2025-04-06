@@ -1,3 +1,10 @@
+# This file is deprecated and has been replaced by:
+# - unit-tests.yml: Handles unit testing and code coverage
+# - branch-promotion.yml: Handles branch promotion logic
+# - java-linter.yml: Handles code linting and formatting
+#
+# Please use the new workflow files instead.
+
 name: Code Coverage (Jacoco Report) - Java CI with Maven
 
 on:

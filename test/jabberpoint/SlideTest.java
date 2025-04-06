@@ -3,15 +3,19 @@ package jabberpoint;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.Font;
+import java.awt.Color;
 import java.awt.image.ImageObserver;
 import java.util.List;
 
 import jabberpoint.model.Slide;
 import jabberpoint.model.SlideItem;
 import jabberpoint.model.TextItem;
+import jabberpoint.model.Style;
 
 /**
  * Unit test for the Slide class
@@ -24,6 +28,8 @@ public class SlideTest {
     public void setUp() {
         slide = new Slide();
         slide.setTitle("Test Slide");
+        // Ensure styles are initialized
+        Style.createStyles();
     }
     
     @Test
@@ -101,18 +107,24 @@ public class SlideTest {
     
     @Test
     public void testDraw() {
-        // This is a visual test that's hard to verify without mocking
-        // We'll just ensure it doesn't throw exceptions
-        Graphics mockGraphics = null; // We're not actually using this
+        // Create a mock Graphics2D object
+        Graphics2D mockGraphics = mock(Graphics2D.class);
         Rectangle area = new Rectangle(0, 0, 800, 600);
-        ImageObserver mockObserver = null; // We're not actually using this
+        ImageObserver mockObserver = mock(ImageObserver.class);
         
-        // Should not throw exception even with null graphics
+        // Mock necessary methods to prevent NullPointerException
+        when(mockGraphics.getFont()).thenReturn(new Font("SansSerif", Font.PLAIN, 12));
+        when(mockGraphics.getColor()).thenReturn(Color.BLACK);
+        
+        // Should not throw exception with mocked graphics
         assertDoesNotThrow(() -> slide.draw(mockGraphics, area, mockObserver));
         
         // Add an item and test again
         slide.append(new TextItem(1, "Test Item"));
         assertDoesNotThrow(() -> slide.draw(mockGraphics, area, mockObserver));
+        
+        // Verify that at least some drawing methods were called
+        verify(mockGraphics, atLeastOnce()).drawString(anyString(), anyInt(), anyInt());
     }
     
     @Test

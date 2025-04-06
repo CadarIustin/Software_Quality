@@ -21,6 +21,8 @@ public class PresentationTest {
         Slide slide = new Slide();
         slide.setTitle("Test Slide");
         presentation.addSlide(slide);
+        // Set slide number to 0 to ensure consistent state
+        presentation.setSlideNumber(0);
     }
     
     @Test
@@ -93,6 +95,14 @@ public class PresentationTest {
         
         // Register the observer
         presentation.addObserver(observer);
+        
+        // Add a second slide to ensure we can navigate
+        Slide slide2 = new Slide();
+        slide2.setTitle("Second Slide");
+        presentation.addSlide(slide2);
+        
+        // Reset notification flag in case it was triggered by adding the slide
+        observer.wasNotified = false;
         
         // Trigger a change that should notify observers
         presentation.nextSlide();

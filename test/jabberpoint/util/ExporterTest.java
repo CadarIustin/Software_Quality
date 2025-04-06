@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.io.FileReader;
@@ -110,12 +109,12 @@ public class ExporterTest {
         String invalidPath = "/invalid/path/that/does/not/exist/test.html";
         
         // HTML Export with invalid path should throw IOException
-        Exception exception = assertThrows(IOException.class, () -> {
+        assertThrows(IOException.class, () -> {
             htmlExporter.exportPresentation(presentation, invalidPath);
         });
         
         // Text Export with invalid path should throw IOException
-        exception = assertThrows(IOException.class, () -> {
+        assertThrows(IOException.class, () -> {
             textExporter.exportPresentation(presentation, invalidPath);
         });
         
@@ -123,7 +122,7 @@ public class ExporterTest {
         final String validPath = tempDir.resolve("null_test.txt").toString();
         
         // Export with null presentation should throw NullPointerException
-        exception = assertThrows(NullPointerException.class, () -> {
+        assertThrows(NullPointerException.class, () -> {
             textExporter.exportPresentation(null, validPath);
         });
     }

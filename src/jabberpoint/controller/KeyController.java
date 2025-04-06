@@ -26,10 +26,18 @@ public class KeyController extends KeyAdapter {
                 presentation.previousSlide();
                 break;
             case KeyEvent.VK_Q:
-                System.exit(0);
+                exit();
                 break;
             default:
                 break;
         }
+    }
+    
+    /**
+     * Exit the application
+     * This method can be overridden in tests to prevent actual system exit
+     */
+    protected void exit() {
+        System.exit(0);
     }
 }

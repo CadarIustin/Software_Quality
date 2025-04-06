@@ -10,10 +10,8 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import java.awt.event.KeyEvent;
 
 import jabberpoint.model.Presentation;
-import jabberpoint.model.Style;
 import jabberpoint.util.DefaultTheme;
 import jabberpoint.util.DarkTheme;
 import jabberpoint.util.HTMLExporter;
@@ -52,7 +50,7 @@ public class MenuController extends MenuBar implements ActionListener {
     private static final String DARK_THEME = "Dark Theme";
     private static final String CYCLE_TRANSITION = "Cycle Transition";
     
-    private static final String SAVEFILE = "presentation.xml";
+    protected static final String DEFAULT_SAVEFILE = "presentation.xml";
     
     private static final String IOEX = "IO Exception: ";
     private static final String LOADERR = "Load Error";

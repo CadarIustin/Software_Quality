@@ -31,8 +31,9 @@ jobs:
         uses: axel-op/googlejavaformat-action@v3
         with:
           args: "--replace"
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
-          commitMessage: "style: Apply Google Java Format"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "style: Apply Google Java Format"
+          version: "1.15.0"
           
       - name: Run Checkstyle
         run: mvn checkstyle:check

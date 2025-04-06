@@ -41,8 +41,16 @@ public class KeyControllerTest {
         when(mockKeyEvent.getKeyCode()).thenReturn(KeyEvent.VK_ENTER);
         keyController.keyPressed(mockKeyEvent);
         
-        // Verify nextSlide was called 3 times
-        verify(mockPresentation, times(3)).nextSlide();
+        // Test Right Arrow key
+        when(mockKeyEvent.getKeyCode()).thenReturn(KeyEvent.VK_RIGHT);
+        keyController.keyPressed(mockKeyEvent);
+        
+        // Test Plus key
+        when(mockKeyEvent.getKeyCode()).thenReturn(KeyEvent.VK_PLUS);
+        keyController.keyPressed(mockKeyEvent);
+        
+        // Verify nextSlide was called 5 times
+        verify(mockPresentation, times(5)).nextSlide();
     }
     
     @Test
@@ -56,11 +64,15 @@ public class KeyControllerTest {
         keyController.keyPressed(mockKeyEvent);
         
         // Test '-' key (character '-')
-        when(mockKeyEvent.getKeyCode()).thenReturn((int)'-');
+        when(mockKeyEvent.getKeyCode()).thenReturn(KeyEvent.VK_MINUS);
         keyController.keyPressed(mockKeyEvent);
         
-        // Verify previousSlide was called 3 times
-        verify(mockPresentation, times(3)).previousSlide();
+        // Test Left Arrow key
+        when(mockKeyEvent.getKeyCode()).thenReturn(KeyEvent.VK_LEFT);
+        keyController.keyPressed(mockKeyEvent);
+        
+        // Verify previousSlide was called 4 times
+        verify(mockPresentation, times(4)).previousSlide();
     }
     
     @Test

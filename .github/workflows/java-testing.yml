@@ -49,9 +49,9 @@ jobs:
     # Removed problematic custom Maven configuration that causes cache issues
     - name: Build with Maven
       run: mvn -B package -Dmaven.test.skip=true
-    - name: Run tests
+    - name: Run tests with JaCoCo coverage
       id: run_tests
-      run: mvn test
+      run: mvn test jacoco:report
       continue-on-error: true
     - name: Check test status
       id: check_tests
@@ -64,9 +64,6 @@ jobs:
           echo "tests_passed=false" >> $GITHUB_OUTPUT
           exit 1
         fi
-    - name: Generate JaCoCo report
-      if: steps.check_tests.outputs.tests_passed == 'true'
-      run: mvn jacoco:report
     - name: Upload report
       if: steps.check_tests.outputs.tests_passed == 'true'
       uses: actions/upload-artifact@v4

@@ -13,11 +13,7 @@ import javax.swing.JOptionPane;
 
 import jabberpoint.model.Presentation;
 import jabberpoint.util.DemoLoader;
-import jabberpoint.util.HTMLExporter;
-import jabberpoint.util.PresentationExporter;
-import jabberpoint.util.TextExporter;
 import jabberpoint.util.XMLLoader;
-import jabberpoint.util.XMLSaver;
 import jabberpoint.view.AboutBox;
 import jabberpoint.view.SlideEditorFrame;
 
@@ -36,10 +32,6 @@ public class MenuController extends MenuBar implements ActionListener {
     private static final String OPEN = "Open";
     private static final String PAGENR = "Page number?";
     private static final String PREV = "Prev";
-    private static final String SAVE = "Save";
-    private static final String EXPORT = "Export";
-    private static final String EXPORT_HTML = "Export to HTML";
-    private static final String EXPORT_TEXT = "Export to Text";
     private static final String EDIT = "Edit";
     private static final String EDIT_PRESENTATION = "Edit Presentation";
     private static final String VIEW = "View";
@@ -48,9 +40,6 @@ public class MenuController extends MenuBar implements ActionListener {
     
     private static final String IOEX = "IO Exception: ";
     private static final String LOADERR = "Load Error";
-    private static final String SAVEERR = "Save Error";
-    private static final String EXPORTERR = "Export Error";
-    
     private static final String NAVIGATION_HELP_TEXT = 
             "Navigation Controls:\n\n" +
             "Next Slide:\n" +
@@ -67,7 +56,7 @@ public class MenuController extends MenuBar implements ActionListener {
             "Exit Presentation:\n" +
             "- 'Q' Key\n\n" +
             "You can also use the View menu to navigate between slides.";
-
+    
     public MenuController(Frame frame, Presentation pres) {
         parent = frame;
         presentation = pres;
@@ -80,20 +69,6 @@ public class MenuController extends MenuBar implements ActionListener {
         
         fileMenu.add(menuItem = mkMenuItem(NEW));
         menuItem.addActionListener(this);
-        
-        fileMenu.add(menuItem = mkMenuItem(SAVE));
-        menuItem.addActionListener(this);
-        
-        // Export submenu
-        Menu exportMenu = new Menu(EXPORT);
-        
-        exportMenu.add(menuItem = new MenuItem(EXPORT_HTML));
-        menuItem.addActionListener(this);
-        
-        exportMenu.add(menuItem = new MenuItem(EXPORT_TEXT));
-        menuItem.addActionListener(this);
-        
-        fileMenu.add(exportMenu);
         
         fileMenu.addSeparator();
         
@@ -131,23 +106,19 @@ public class MenuController extends MenuBar implements ActionListener {
         
         setHelpMenu(helpMenu);
     }
-    
-    @Override
+
     public void actionPerformed(ActionEvent actionEvent) {
         String command = actionEvent.getActionCommand();
         
-        switch(command) {
+        switch (command) {
             case OPEN:
                 openPresentation();
                 break;
             case NEW:
                 newPresentation();
                 break;
-            case SAVE:
-                savePresentation();
-                break;
             case EXIT:
-                presentation.exit(0);
+                System.exit(0);
                 break;
             case NEXT:
                 presentation.nextSlide();
@@ -160,12 +131,6 @@ public class MenuController extends MenuBar implements ActionListener {
                 break;
             case ABOUT:
                 AboutBox.show(parent);
-                break;
-            case EXPORT_HTML:
-                exportPresentation(new HTMLExporter());
-                break;
-            case EXPORT_TEXT:
-                exportPresentation(new TextExporter());
                 break;
             case EDIT_PRESENTATION:
                 openSlideEditor();
@@ -199,94 +164,60 @@ public class MenuController extends MenuBar implements ActionListener {
             
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 try {
-                    XMLLoader loader = new XMLLoader();
+                    XMLLoader xmlLoader = new XMLLoader();
                     presentation.clear();
-                    loader.loadPresentation(presentation, fileChooser.getSelectedFile().getPath());
+                    xmlLoader.loadPresentation(presentation, fileChooser.getSelectedFile().getPath());
                     presentation.setSlideNumber(0);
                 } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(parent, IOEX + ex, LOADERR, JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(parent, IOEX + ex,
+                            LOADERR, JOptionPane.ERROR_MESSAGE);
                 }
             }
         } else if (choice == 1) {
             // Load Demo option selected
             loadDemoPresentation();
         }
-        // If Cancel (choice == 2) or dialog closed, do nothing
-    }
-    
-    private void savePresentation() {
-        if (presentation.getTitle() == null || presentation.getTitle().isEmpty()) {
-            presentation.setTitle("Saved Presentation");
-        }
-        
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setCurrentDirectory(new java.io.File("."));
-        int returnVal = fileChooser.showSaveDialog(parent);
-        
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            try {
-                XMLSaver saver = new XMLSaver();
-                saver.savePresentation(presentation, fileChooser.getSelectedFile().getPath());
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(parent, IOEX + ex, SAVEERR, JOptionPane.ERROR_MESSAGE);
-            }
-        }
+        // If Cancel was selected, do nothing
     }
     
     private void newPresentation() {
         presentation.clear();
-        presentation.setTitle("New Presentation");
-        presentation.setSlideNumber(-1);
-    }
-    
-    private void exportPresentation(PresentationExporter exporter) {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setCurrentDirectory(new java.io.File("."));
-        int returnVal = fileChooser.showSaveDialog(parent);
-        
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            try {
-                exporter.exportPresentation(presentation, fileChooser.getSelectedFile().getPath());
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(parent, IOEX + ex, EXPORTERR, JOptionPane.ERROR_MESSAGE);
-            }
-        }
+        parent.repaint();
     }
     
     private void gotoSlide() {
         String pageNumberStr = JOptionPane.showInputDialog(PAGENR);
-        int pageNumber;
+        int pageNumber = 0;
+        
         try {
             pageNumber = Integer.parseInt(pageNumberStr);
-            presentation.setSlideNumber(pageNumber - 1);
-        } catch (NumberFormatException nfe) {
-            // Do nothing if invalid number format
-        } catch (IllegalArgumentException iae) {
-            // Do nothing if slide number out of range
+            if (pageNumber > 0 && pageNumber <= presentation.getSize()) {
+                presentation.setSlideNumber(pageNumber - 1);
+            }
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(parent, "Invalid slide number: " + pageNumberStr);
         }
     }
     
     private void openSlideEditor() {
-        new SlideEditorFrame(parent, presentation);
+        SlideEditorFrame editor = new SlideEditorFrame(presentation);
+        editor.setVisible(true);
     }
     
     private void loadDemoPresentation() {
+        presentation.clear();
         try {
             DemoLoader demoLoader = new DemoLoader();
-            presentation.clear();
             demoLoader.loadPresentation(presentation, "");
             presentation.setSlideNumber(0);
         } catch (IOException ex) {
-            JOptionPane.showMessageDialog(parent, IOEX + ex, LOADERR, JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(parent, IOEX + ex,
+                    LOADERR, JOptionPane.ERROR_MESSAGE);
         }
     }
     
     private void showNavigationHelp() {
-        JOptionPane.showMessageDialog(
-                parent,
-                NAVIGATION_HELP_TEXT,
-                "Navigation Help",
-                JOptionPane.INFORMATION_MESSAGE
-        );
+        JOptionPane.showMessageDialog(parent, NAVIGATION_HELP_TEXT, 
+                "Navigation Controls", JOptionPane.INFORMATION_MESSAGE);
     }
 }

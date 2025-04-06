@@ -2,9 +2,9 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [ testing ]
+    branches: [ testing, main, master ]
   pull_request:
-    branches: [ testing ]
+    branches: [ testing, main, master ]
 
 permissions:
   contents: write

@@ -27,17 +27,51 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
       
-      - name: Format code with Google Java Format
-        uses: axel-op/googlejavaformat-action@v3
-        with:
-          args: "--replace"
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "style: Apply Google Java Format"
-          version: "1.15.0"
-          
+      - name: Add Spotless plugin to pom.xml
+        run: |
+          # Check if the spotless plugin is already in the pom.xml
+          if ! grep -q "com.diffplug.spotless" "pom.xml"; then
+            # Use sed to add the Spotless plugin before the closing plugins tag
+            sed -i '/<\/plugins>/i \
+            <plugin>\
+                <groupId>com.diffplug.spotless</groupId>\
+                <artifactId>spotless-maven-plugin</artifactId>\
+                <version>2.22.8</version>\
+                <configuration>\
+                    <java>\
+                        <googleJavaFormat>\
+                            <version>1.15.0</version>\
+                            <style>GOOGLE</style>\
+                        </googleJavaFormat>\
+                        <removeUnusedImports/>\
+                    </java>\
+                </configuration>\
+            </plugin>' pom.xml
+          fi
+      
+      - name: Format code with Spotless
+        run: mvn spotless:apply
+      
       - name: Run Checkstyle
         run: mvn checkstyle:check
         continue-on-error: true
+      
+      - name: Check for modified files
+        id: git-check
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "modified=true" >> $GITHUB_OUTPUT
+          else
+            echo "modified=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Commit and push changes
+        if: steps.git-check.outputs.modified == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "GitHub Actions"
+          git commit -am "style: Apply code formatting"
+          git push
       
       - name: Generate Checkstyle Report
         if: success() || failure()

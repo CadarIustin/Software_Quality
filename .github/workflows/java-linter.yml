@@ -65,13 +65,25 @@ jobs:
             echo "modified=false" >> $GITHUB_OUTPUT
           fi
       
-      - name: Commit and push changes
+      - name: Create Pull Request with formatted code
         if: steps.git-check.outputs.modified == 'true'
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "GitHub Actions"
-          git commit -am "style: Apply code formatting"
-          git push
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'style: Apply code formatting'
+          branch: format-code-${{ github.head_ref || github.ref_name }}
+          delete-branch: true
+          title: 'Format code for ${{ github.head_ref || github.ref_name }}'
+          body: |
+            This PR contains automatically formatted code based on project style guidelines.
+            
+            Changes made by the Spotless Maven plugin:
+            - Formatted Java files according to Google Java Format
+            - Removed unused imports
+            - Applied consistent code style
+          labels: automated-pr, code-formatting
+          base: ${{ github.head_ref || github.ref_name }}
+          draft: false
       
       - name: Generate Checkstyle Report
         if: success() || failure()

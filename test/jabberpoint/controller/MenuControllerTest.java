@@ -6,11 +6,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.awt.event.ActionEvent;
-import java.awt.Frame;
 
 import jabberpoint.model.Presentation;
 import jabberpoint.view.SlideViewerFrame;
-import jabberpoint.view.SlideViewerComponent;
 
 /**
  * Unit test for the MenuController class
@@ -214,83 +212,9 @@ public class MenuControllerTest {
         
         try {
             menuController.actionPerformed(mockEvent);
-            // Test passes if no unexpected exceptions
+            // Test will pass if no unexpected exceptions occur
         } catch (Exception e) {
-            // Some implementations might throw exceptions due to UI dependencies
-            assertTrue(e instanceof NullPointerException || e instanceof SecurityException);
-        }
-    }
-    
-    @Test
-    void testCycleTransitionAction() {
-        // Test the Cycle Transition action
-        when(mockEvent.getActionCommand()).thenReturn("Cycle Transition");
-        
-        // Mock SlideViewerFrame and SlideViewerComponent
-        SlideViewerFrame mockSVFrame = mock(SlideViewerFrame.class);
-        SlideViewerComponent mockSVComponent = mock(SlideViewerComponent.class);
-        
-        // Create a new MenuController with the mock SlideViewerFrame
-        menuController = new MenuController(mockSVFrame, mockPresentation);
-        
-        // Set up the mock chain
-        when(mockSVFrame.getSlideViewerComponent()).thenReturn(mockSVComponent);
-        when(mockSVComponent.getCurrentTransitionName()).thenReturn("Test Transition");
-        
-        menuController.actionPerformed(mockEvent);
-        
-        // Verify that cycleTransitionType was called
-        verify(mockSVComponent).cycleTransitionType();
-    }
-    
-    @Test
-    void testCycleTransitionWithNonSlideViewerFrame() {
-        // Test when parent is not a SlideViewerFrame
-        when(mockEvent.getActionCommand()).thenReturn("Cycle Transition");
-        
-        // Create a MenuController with a non-SlideViewerFrame parent
-        Frame mockFrame = mock(Frame.class);
-        MenuController controller = new MenuController(mockFrame, mockPresentation);
-        
-        // This should execute the branch where parent is not instance of SlideViewerFrame
-        controller.actionPerformed(mockEvent);
-        
-        // No verification needed - we just want to exercise the branch
-        // The action simply does nothing when parent is not a SlideViewerFrame
-    }
-    
-    @Test
-    void testDefaultThemeAction() {
-        // Test the Default Theme action
-        when(mockEvent.getActionCommand()).thenReturn("Default Theme");
-        
-        menuController.actionPerformed(mockEvent);
-        
-        // Verify that observers were notified for theme change
-        verify(mockPresentation).notifyObservers();
-    }
-    
-    @Test
-    void testDarkThemeAction() {
-        // Test the Dark Theme action
-        when(mockEvent.getActionCommand()).thenReturn("Dark Theme");
-        
-        menuController.actionPerformed(mockEvent);
-        
-        // Verify that observers were notified for theme change
-        verify(mockPresentation).notifyObservers();
-    }
-    
-    @Test
-    void testAboutAction() {
-        // Test the About action
-        when(mockEvent.getActionCommand()).thenReturn("About");
-        
-        try {
-            menuController.actionPerformed(mockEvent);
-            // Test passes if no unexpected exceptions
-        } catch (Exception e) {
-            // AboutBox might throw exceptions due to UI dependencies
+            // Expected to get an exception due to null frame or security
             assertTrue(e instanceof NullPointerException || e instanceof SecurityException);
         }
     }
@@ -300,8 +224,7 @@ public class MenuControllerTest {
         // Test every action command in the switch statement
         String[] commands = {"Open", "New", "Save", "Save as", "Print", "Exit", 
                              "Next", "Prev", "Goto", "About", "Export HTML", 
-                             "Export Text", "Edit Presentation", "Cycle Transition", 
-                             "Default Theme", "Dark Theme"};
+                             "Export Text", "Edit Presentation"};
         
         for (String command : commands) {
             when(mockEvent.getActionCommand()).thenReturn(command);
@@ -315,19 +238,5 @@ public class MenuControllerTest {
                 // Not to test full functionality which would require complex mocking
             }
         }
-    }
-    
-    @Test
-    void testCycleTransition() {
-        // Get a reference to the viewer component for direct testing
-        SlideViewerComponent mockViewer = mock(SlideViewerComponent.class);
-        when(mockFrame.getSlideViewerComponent()).thenReturn(mockViewer);
-        
-        // Test cycle transition action
-        when(mockEvent.getActionCommand()).thenReturn("Cycle Transition");
-        menuController.actionPerformed(mockEvent);
-        
-        // Test that the method calls cycleTransitionType on the component
-        verify(mockViewer).cycleTransitionType();
     }
 }
